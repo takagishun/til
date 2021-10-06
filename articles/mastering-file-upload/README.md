@@ -96,6 +96,7 @@ Content-Disposition: form-data; name="name"
 Content-Disposition: form-data; name="idPhoto"; filename="index.png"
 Content-Type: image/png
 
+<バイナリデータ>
 ```
 
 # XMLHttpRequestで送信
@@ -130,11 +131,7 @@ fetch("/", {
 });
 ```
 
-↓リクエストBody
-
-```text
-
-```
+リクエストBodyはバイナリになる
 
 # サーバーサイドでの受け取り方
 
