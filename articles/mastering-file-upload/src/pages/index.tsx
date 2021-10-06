@@ -7,8 +7,8 @@ const Home: NextPage = () => {
   const handleSubmitFormData = (e: React.FormEvent) => {
     e.preventDefault();
     const form = new FormData();
-    file && form.append("file", file);
-    text && form.append("text", text);
+    text && form.append("name", text);
+    file && form.append("idPhoto", file);
     fetch("/", {
       method: "POST",
       body: form,
@@ -17,7 +17,7 @@ const Home: NextPage = () => {
 
   const handleSubmitOctetStream = (e: React.FormEvent) => {
     e.preventDefault();
-    fetch("/", {
+    fetch("/a", {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",
@@ -32,14 +32,20 @@ const Home: NextPage = () => {
         <h1>application/x-www-form-urlencoded</h1>
         <form method="POST">
           <label>
-            firstName
-            <input type="text" name="firstName" />
+            姓: <input type="text" name="lastName" />
           </label>
           <br />
           <label>
-            lastName
-            <input type="text" name="lastName" />
+            名: <input type="text" name="firstName" />
           </label>
+          <br />
+          <input type="submit" />
+        </form>
+      </section>
+      <section>
+        <h1>application/x-www-form-urlencoded with file</h1>
+        <form method="POST">
+          <input type="file" name="file" />
           <br />
           <input type="submit" />
         </form>
@@ -48,13 +54,13 @@ const Home: NextPage = () => {
         <h1>multipart/form-data</h1>
         <form method="POST" encType="multipart/form-data">
           <label>
-            text
-            <input type="text" name="text" />
+            名前:
+            <input type="text" name="name" />
           </label>
           <br />
           <label>
-            file
-            <input type="file" name="file" />
+            顔写真:
+            <input type="file" name="idPhoto" />
           </label>
           <br />
           <input type="submit" />
@@ -64,19 +70,19 @@ const Home: NextPage = () => {
         <h1>multipart/form-data for xhr</h1>
         <form method="POST" onSubmit={handleSubmitFormData}>
           <label>
-            text
+            名前:
             <input
               type="text"
-              name="text"
+              name="name"
               onChange={(e) => setText(e.target.value)}
             />
           </label>
           <br />
           <label>
-            file
+            顔写真
             <input
               type="file"
-              name="file"
+              name="idPhoto"
               onChange={(e) => e.target.files && setFile(e.target.files[0])}
             />
           </label>
@@ -91,7 +97,7 @@ const Home: NextPage = () => {
             file
             <input
               type="file"
-              name="file"
+              name="idPhoto"
               onChange={(e) => e.target.files && setFile(e.target.files[0])}
             />
           </label>
