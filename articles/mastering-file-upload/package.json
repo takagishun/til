@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "nodemon"
+    "stdout": "ts-node -P ./tsconfig.server.json ./src/server/stdout.ts",
+    "toFile": "ts-node -P ./tsconfig.server.json ./src/server/toFile.ts"
   },
   "dependencies": {
     "next": "11.1.2",

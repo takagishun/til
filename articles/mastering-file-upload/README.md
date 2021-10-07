@@ -138,40 +138,50 @@ fetch("/", {
 
 # サーバーサイド(Nodejs)での受け取り方
 
-Nodejsではリクエストを読み取り可能なストリームとして扱う。
-"data"イベントにcallbackを設定すると、chunkを消費するようになる。
-以下では全chunkをconcatしてリクエストボディ全体をconsoleで見えるようにしている。
+## Nodejsのリクエスト(IncomingMessage)
+Nodejsのリクエスト(IncomingMessage)はReadable streamsを継承しておりストリームとして扱える。
+"data"イベントにcallbackを設定したり、stream.pipe()メソッドを使ってデータのchunk(文字列またはBuffer)を受け取れる。
+以下では全chunkを標準出力書き出している。(標準出力はWritable stream)
 
 ```javascript
 import { createServer } from "http";
+import { parse } from "url";
+import next from "next";
 
-createServer((req, res) => {
+const dev = process.env.NODE_ENV !== "production";
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+  createServer((req, res) => {
+    const parsedUrl = parse(req.url || "", true);
+    handle(req, res, parsedUrl);
+
     if (req.method === "POST") {
       console.log("content-type:", req.headers["content-type"]);
-      let body: any = [];
       req
         .on("data", (chunk) => {
-          // 読み取り可能なストリームのチャンクを扱える。
-          console.log(`Received ${chunk.length} bytes of data.`);
-          body.push(chunk);
+          process.stdout.write(chunk)
         })
         .on("end", () => {
-          // 消費するチャンクが無くなったら、"end"イベントがemitされる。
-          body = Buffer.concat(body);
-          console.log("【request body】\n" + body);
           res.writeHead(200).end();
         });
     }
-}).listen(3000, () => {
-console.log("> Ready on http://localhost:3000");
+  }).listen(3000, () => {
+    console.log("> Ready on http://localhost:3000");
+  });
 });
 ```
 
-`application/octet-stream` でpng画像を送信し、NFSなどに画像を保存するようなユースケースでは、
-writableなstreamを作成し、chunkを書き出すことができる。
+## ファイルへの書き出し
+
+`application/octet-stream` でpng画像を送信し、サーバーにマウントしているNFSなどに画像を保存するようなユースケースでは、
+fsでWrite streamを作成し、fileにchunkを書き出すことができる。
 
 ```javascript
 const writable = fs.createWriteStream("./src/tmp/data.png");
+console.log("content-type:", req.headers["content-type"]);
+// => content-type: application/octet-stream
 req
   .on("data", (chunk) => {
     writable.write(chunk);
@@ -187,10 +197,15 @@ const writable = fs.createWriteStream("./src/tmp/data.png");
 req.pipe(writable)
 ```
 
-# ライブラリの紹介
+# パース処理をするライブラリの紹介
 
-特に`multipart/form-data` では、パースしたりいろいろ処理が複雑なのでライブラリに任せてしまった方が良い気がする。
-busboy
+`multipart/form-data` では、パースしたりいろいろ処理が複雑なのでよしなにやってくれるライブラリを紹介する。
+
+## busboy
+
+https://github.com/mscdex/busboy
+
+
 
 
 

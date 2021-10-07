@@ -17,7 +17,7 @@ const Home: NextPage = () => {
 
   const handleSubmitOctetStream = (e: React.FormEvent) => {
     e.preventDefault();
-    fetch("/a", {
+    fetch("/", {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",

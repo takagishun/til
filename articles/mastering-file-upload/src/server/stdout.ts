@@ -1,5 +1,4 @@
 import { createServer } from "http";
-import fs from "fs";
 import { parse } from "url";
 import next from "next";
 
@@ -12,26 +11,14 @@ app.prepare().then(() => {
     const parsedUrl = parse(req.url || "", true);
     handle(req, res, parsedUrl);
 
-    if (req.method === "POST" && req.url !== "/") {
-      const writable = fs.createWriteStream("./src/tmp/data.png");
-      req.on("end", () => {
-        res.writeHead(200).end();
-      });
-      req.pipe(writable);
-      return;
-    }
-
     if (req.method === "POST") {
       console.log("content-type:", req.headers["content-type"]);
-      let body: any = [];
       req
         .on("data", (chunk) => {
-          console.log(`Received ${chunk.length} bytes of data.`);
-          body.push(chunk);
+          // console.log(`Received ${chunk.length} bytes of data.`);
+          process.stdout.write(chunk)
         })
         .on("end", () => {
-          body = Buffer.concat(body);
-          console.log("【request body】\n" + body);
           res.writeHead(200).end();
         });
     }
