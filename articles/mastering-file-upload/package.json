@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "stdout": "ts-node -P ./tsconfig.server.json ./src/server/stdout.ts",
-    "toFile": "ts-node -P ./tsconfig.server.json ./src/server/toFile.ts"
+    "toFile": "ts-node -P ./tsconfig.server.json ./src/server/toFile.ts",
+    "busboy": "ts-node -P ./tsconfig.server.json ./src/server/busboy.ts"
   },
   "dependencies": {
+    "@types/busboy": "^0.2.4",
+    "busboy": "^0.3.1",
     "next": "11.1.2",
     "react": "17.0.2",
     "react-dom": "17.0.2"

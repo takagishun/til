@@ -2,7 +2,6 @@ import { createServer } from "http";
 import fs from "fs";
 import { parse } from "url";
 import next from "next";
-import {Readable} from "stream";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });

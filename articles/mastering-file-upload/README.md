@@ -205,6 +205,27 @@ req.pipe(writable)
 
 https://github.com/mscdex/busboy
 
+```typescript
+if (req.method === "POST") {
+  const busboy = new Busboy({ headers: req.headers });
+  busboy.on('file', (fieldname, file, filename) => {
+    const writable = fs.createWriteStream(`./src/tmp/${filename}`);
+    file.pipe(writable)
+  });
+  busboy.on('field', (fieldname, val) => {
+    console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+  });
+  busboy.on('finish', function() {
+    console.log('Done parsing form!');
+    res.end();
+  });
+  req.pipe(busboy);
+}
+```
+
+# その他
+
+ファイルタイプの判定 とか書きたい
 
 
 
