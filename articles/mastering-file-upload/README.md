@@ -26,8 +26,6 @@ formのmethod属性の値がpostであるとき、enctype属性によってサ�
 
 ## multipart/form-data
 
-ファイルを扱う場合は`multipart/form-data`で送信すると良い。
-
 ```html
 <form method="POST" enctype="multipart/form-data">
     <input type="text" name="textfield">
@@ -72,6 +70,8 @@ file=index.png
 ```
 
 ## multipart/form-data
+
+ファイルを扱う場合は`multipart/form-data`で送信すると良い。
 
 ```html
 <form method="POST" enctype="multipart/form-data">
