@@ -8,8 +8,8 @@
 
 # HTMLフォームのenctype属性
 
-formのmethod属性の値がpostであるとき、enctype属性によってサーバーに送信する際に使用する、コンテンツのMIMEタイプを指定できる。  
-以下の値が指定可能。
+formのmethod属性の値がpostであるとき、enctype属性によってサーバーに送信するコンテンツのMIMEタイプを指定できる。  
+`application/x-www-form-urlencoded`と`multipart/form-data` が指定可能。
 
 ## application/x-www-form-urlencoded
 
@@ -22,7 +22,7 @@ formのmethod属性の値がpostであるとき、enctype属性によってサ�
 ```
 
 初期値。この値をしてした場合のリクエストbodyは`key=value`の形でキーと値の一組になり、`&`で区切られる。
-キーや値の英数字以外の文字は、パーセントエンコーディングされる。そのため、バイナリデータを扱うには向かない。
+キーや値の英数字以外の文字は、パーセントエンコーディングされる。(バイナリデータを扱うには向かない。)
 
 ## multipart/form-data
 
@@ -35,9 +35,9 @@ formのmethod属性の値がpostであるとき、enctype属性によってサ�
 ```
 
 主にtype属性で"file"を指定したinput要素がある場合に使用する値。  
-それぞれの値はデータのブロック ("body part") として送信され、ユーザーエージェントが定義するデリミター ("boundary") がそれぞれの部分を区切りる。キーはそれぞれの部分の Content-Disposition ヘッダーの中で与えられる。
+それぞれの値はデータのブロック ("body part") として送信され、ユーザーエージェントが定義するデリミター ("boundary") がそれぞれの部分を区切りる。inputのname属性はそれぞれのPartの Content-Disposition ヘッダーの中で与えられる。
 
-# リクエストボディの違い
+# MIMEタイプに対するリクエストボディの違い
 
 ## application/x-www-form-urlencoded
 
@@ -99,11 +99,14 @@ Content-Type: image/png
 <バイナリデータ>
 ```
 
-# XMLHttpRequestで送信
+# XMLHttpRequestで送信可能なMIMEタイプ
+
+HTMLフォーム以外の送信方法、例えばXMLHttpRequestではあらゆるMIMEタイプを選択できる。
+画像を扱う場合は `multipart/form-data`や`application/octet-stream`を指定する。
 
 ## multipart/form-data
 
-XMLHttpRequestでmultipart/form-dataで送信したい場合は、FormDataオブジェクトを使って送信できる。
+XMLHttpRequestで`multipart/form-data`で送信したい場合は、FormDataオブジェクトを使って送信できる。
 https://developer.mozilla.org/ja/docs/Web/API/FormData/Using_FormData_Objects
 
 ```javascript
@@ -133,10 +136,10 @@ fetch("/", {
 
 リクエストBodyはバイナリになる
 
-# サーバーサイドでの受け取り方
+# サーバーサイド(Nodejs)での受け取り方
 
 Nodejsではリクエストを読み取り可能なストリームとして扱う。
-"data" イベントにcallbackを設定すると、chunkを消費するようになる。
+"data"イベントにcallbackを設定すると、chunkを消費するようになる。
 以下では全chunkをconcatしてリクエストボディ全体をconsoleで見えるようにしている。
 
 ```javascript
