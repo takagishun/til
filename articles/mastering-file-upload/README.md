@@ -8,8 +8,8 @@
 
 # HTMLフォームのenctype属性
 
-formのmethod属性の値がpostであるとき、enctype属性によってサーバーに送信する際に使用する、コンテンツのMIMEタイプを指定できる。  
-以下の値が指定可能。
+formのmethod属性の値がpostであるとき、enctype属性によってサーバーに送信するコンテンツのMIMEタイプを指定できる。  
+`application/x-www-form-urlencoded`と`multipart/form-data` が指定可能。
 
 ## application/x-www-form-urlencoded
 
@@ -22,7 +22,7 @@ formのmethod属性の値がpostであるとき、enctype属性によってサ�
 ```
 
 初期値。この値をしてした場合のリクエストbodyは`key=value`の形でキーと値の一組になり、`&`で区切られる。
-キーや値の英数字以外の文字は、パーセントエンコーディングされる。そのため、バイナリデータを扱うには向かない。
+キーや値の英数字以外の文字は、パーセントエンコーディングされる。(バイナリデータを扱うには向かない。)
 
 ## multipart/form-data
 
@@ -35,9 +35,9 @@ formのmethod属性の値がpostであるとき、enctype属性によってサ�
 ```
 
 主にtype属性で"file"を指定したinput要素がある場合に使用する値。  
-それぞれの値はデータのブロック ("body part") として送信され、ユーザーエージェントが定義するデリミター ("boundary") がそれぞれの部分を区切りる。キーはそれぞれの部分の Content-Disposition ヘッダーの中で与えられる。
+それぞれの値はデータのブロック ("body part") として送信され、ユーザーエージェントが定義するデリミター ("boundary") がそれぞれの部分を区切りる。inputのname属性はそれぞれのPartの Content-Disposition ヘッダーの中で与えられる。
 
-# リクエストボディの違い
+# MIMEタイプに対するリクエストボディの違い
 
 ## application/x-www-form-urlencoded
 
@@ -71,6 +71,8 @@ file=index.png
 
 ## multipart/form-data
 
+ファイルを扱う場合は`multipart/form-data`で送信すると良い。
+
 ```html
 <form method="POST" enctype="multipart/form-data">
     <label>名前: <input type="text" name="name"></label>
@@ -99,11 +101,14 @@ Content-Type: image/png
 <バイナリデータ>
 ```
 
-# XMLHttpRequestで送信
+# XMLHttpRequestで送信可能なMIMEタイプ
+
+HTMLフォーム以外の送信方法、例えばXMLHttpRequestではあらゆるMIMEタイプを選択できる。
+画像を扱う場合は `multipart/form-data`や`application/octet-stream`を指定する。
 
 ## multipart/form-data
 
-XMLHttpRequestでmultipart/form-dataで送信したい場合は、FormDataオブジェクトを使って送信できる。
+XMLHttpRequestで`multipart/form-data`で送信したい場合は、FormDataオブジェクトを使って送信できる。
 https://developer.mozilla.org/ja/docs/Web/API/FormData/Using_FormData_Objects
 
 ```javascript
@@ -133,42 +138,52 @@ fetch("/", {
 
 リクエストBodyはバイナリになる
 
-# サーバーサイドでの受け取り方
+# サーバーサイド(Nodejs)での受け取り方
 
-Nodejsではリクエストを読み取り可能なストリームとして扱う。
-"data" イベントにcallbackを設定すると、chunkを消費するようになる。
-以下では全chunkをconcatしてリクエストボディ全体をconsoleで見えるようにしている。
+## Nodejsのリクエスト(IncomingMessage)
+Nodejsのリクエスト(IncomingMessage)はReadable streamsを継承しておりストリームとして扱える。
+"data"イベントにcallbackを設定したり、stream.pipe()メソッドを使ってデータのchunk(文字列またはBuffer)を受け取れる。
+以下では全chunkを標準出力書き出している。(標準出力はWritable stream)
 
 ```javascript
 import { createServer } from "http";
+import { parse } from "url";
+import next from "next";
 
-createServer((req, res) => {
+const dev = process.env.NODE_ENV !== "production";
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+  createServer((req, res) => {
+    const parsedUrl = parse(req.url || "", true);
+    handle(req, res, parsedUrl);
+
     if (req.method === "POST") {
       console.log("content-type:", req.headers["content-type"]);
-      let body: any = [];
       req
         .on("data", (chunk) => {
-          // 読み取り可能なストリームのチャンクを扱える。
-          console.log(`Received ${chunk.length} bytes of data.`);
-          body.push(chunk);
+          process.stdout.write(chunk)
         })
         .on("end", () => {
-          // 消費するチャンクが無くなったら、"end"イベントがemitされる。
-          body = Buffer.concat(body);
-          console.log("【request body】\n" + body);
           res.writeHead(200).end();
         });
     }
-}).listen(3000, () => {
-console.log("> Ready on http://localhost:3000");
+  }).listen(3000, () => {
+    console.log("> Ready on http://localhost:3000");
+  });
 });
 ```
 
-`application/octet-stream` でpng画像を送信し、NFSなどに画像を保存するようなユースケースでは、
-writableなstreamを作成し、chunkを書き出すことができる。
+## ファイルへの書き出し
+
+`application/octet-stream` でpng画像を送信し、サーバーにマウントしているNFSなどに画像を保存するようなユースケースでは、
+fsでWrite streamを作成し、fileにchunkを書き出すことができる。
 
 ```javascript
 const writable = fs.createWriteStream("./src/tmp/data.png");
+console.log("content-type:", req.headers["content-type"]);
+// => content-type: application/octet-stream
 req
   .on("data", (chunk) => {
     writable.write(chunk);
@@ -184,10 +199,36 @@ const writable = fs.createWriteStream("./src/tmp/data.png");
 req.pipe(writable)
 ```
 
-# ライブラリの紹介
+# パース処理をするライブラリの紹介
 
-特に`multipart/form-data` では、パースしたりいろいろ処理が複雑なのでライブラリに任せてしまった方が良い気がする。
-busboy
+`multipart/form-data` では、パースしたりいろいろ処理が複雑なのでよしなにやってくれるライブラリを紹介する。
+
+## busboy
+
+https://github.com/mscdex/busboy
+
+```typescript
+if (req.method === "POST") {
+  const busboy = new Busboy({ headers: req.headers });
+  busboy.on('file', (fieldname, file, filename) => {
+    const writable = fs.createWriteStream(`./src/tmp/${filename}`);
+    file.pipe(writable)
+  });
+  busboy.on('field', (fieldname, val) => {
+    console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+  });
+  busboy.on('finish', function() {
+    console.log('Done parsing form!');
+    res.end();
+  });
+  req.pipe(busboy);
+}
+```
+
+# その他
+
+ファイルタイプの判定 とか書きたい
+
 
 
 
