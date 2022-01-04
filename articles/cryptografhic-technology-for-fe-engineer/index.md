@@ -97,6 +97,12 @@ Handshakeプロトコルのメッセージの先頭にはヘッダがある。�
 アプリケーションデータを通信する前に、まずはクライアントとサーバー間で安全な通信を確立します。その一連のやりとりをハンドシェイクといいます。
 
 
+#RFC
+
+TLS1.2: https://datatracker.ietf.org/doc/html/rfc5246
+TLS1.3: https://datatracker.ietf.org/doc/html/rfc8446
+
+
 
 
 
