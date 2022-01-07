@@ -91,7 +91,7 @@ TLS Recordプロトコルは、さまざまな上位プロトコルのカプセ�
 
 Handshakeプロトコルのメッセージの先頭にはヘッダがある。このヘッダで メッセージの種類(1バイトで記述される)とメッセージの長さ(3バイトで記述される)を表す。 サーバ認証を伴うフルハンドシェイクを紹介する 図を挿入
 
-## ClientHello
+## ClientHelloメッセージ
 
 - 必要なフィールドはRandom、 CipherSuite、Extensionの3つのみ
 - 他にもフィールドがあるがTLS1.3では利用しない
@@ -101,8 +101,34 @@ Handshakeプロトコルのメッセージの先頭にはヘッダがある。�
   - ハンドシェイクを一意にする
 - CipherSuiteフィールド
   - クライアントが対応可能な暗号スイートを優先度順に提示
+  - TLS1.3で使える暗号スイートは5つのみ
+    - TLS_AES_128_GCM_SHA256
+    - TLS_AES_256_GCM_SHA384
+    - TLS_CHACHA20_POLY1305_SHA256
+    - TLS_AES_128_CCM_SHA256
+    - TLS_AES_128_CCM_8_SHA256
 - Extensionフィールド
   - 拡張
+  - 提案している鍵交換アルゴリズムに必要な情報 ( key_share 拡張の shares)もすべて同時に提供されます。
+  - 本当のバージョン番号はsupported_versions拡張で示される
+
+## ServerHelloメッセージ
+
+- Clientとほぼ同じ構造
+- 選択したプロトコルバージョンと暗号スイートをクライアントに返す
+
+## Certificateメッセージ
+
+- 証明書の送信
+- 基本サーバー証明書のみ
+
+## CertificateVerifyメッセージ
+
+- 秘密鍵の証明
+
+## Finishedメッセージ
+
+- ハンドシェイクの一連のメッセージの完全性を検証
 
 # TLSの限界
 
