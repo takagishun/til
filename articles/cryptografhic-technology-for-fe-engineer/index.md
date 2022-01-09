@@ -162,13 +162,13 @@ enum {
 - Clientとほぼ同じ構造
 - 決定した暗号スイートと鍵交換方式などをクライアントに返す
 
-## 暗号スイートAES_GCMの仕組み
-
-TODO
-
 ## 鍵交換方式DHEの仕組み
 
 TODO
+https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/  
+これ読む。
+
+## 暗号スイートAES_GCMの仕組み
 
 ## Certificateメッセージ
 
