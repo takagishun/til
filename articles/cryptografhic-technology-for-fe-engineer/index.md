@@ -166,7 +166,8 @@ enum {
 
 TODO
 https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/  
-これ読む。
+これ読む。 DHEパラメータの仕様
+https://datatracker.ietf.org/doc/html/rfc7919
 
 ## 暗号スイートAES_GCMの仕組み
 
