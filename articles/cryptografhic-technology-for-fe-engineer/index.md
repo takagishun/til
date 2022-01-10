@@ -169,6 +169,8 @@ https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/
 これ読む。 DHEパラメータの仕様
 https://datatracker.ietf.org/doc/html/rfc7919
 
+- DH鍵交換とHKDF(鍵導入)でPS(前方秘匿性)が得られる
+
 ## 暗号スイートAES_GCMの仕組み
 
 ## Certificateメッセージ
@@ -181,17 +183,57 @@ https://datatracker.ietf.org/doc/html/rfc7919
 ## 証明書の検証
 
 - OSに用意されたルートCA証明書を利用して、サーバ証明書を本物かどうか検証する
-- TODO: 検証の仕方
+- 証明書の検証手順
+  - https://datatracker.ietf.org/doc/html/rfc5280
 
 ## CertificateVerifyメッセージ
 
-- 秘密鍵の証明
+- サーバー証明書の秘密鍵を保持していることの証明をするためのメッセージ
 - 暗号化されて送られる
+- 署名対象コンテンツ
+  - トランスクリプトハッシュ
+    - 各ハンドシェイクメッセージの連結のハッシュを計算
+- 署名に使用される秘密鍵
+  - サーバー証明書の秘密鍵
+- このメッセージを受け取ったクライアントは、サーバー証明書の公開鍵で検証する
 
-## Finishedメッセージ
+```
+struct {
+    SignatureScheme algorithm;
+    opaque signature<0..2^16-1>;
+} CertificateVerify;
+```
+
+## Server Finishedメッセージ
 
 - ハンドシェイクの一連のメッセージの完全性を検証
+- verify_dataはトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュール(HKDF)
+  で生成したbaseKeyのserver_handshake_traffic_secretをfinished_keyにしてHMACした値
 - 暗号化されて送られる
+- 受け取ったら検証する
+
+## Client Finishedメッセージ
+
+- 同様にハンドシェイクの一連のメッセージの完全性を検証
+- verify_dataはトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュール(HKDF)
+  で生成したbaseKeyのclient_handshake_traffic_secretをfinished_keyにしてHMACしたMAC値
+- 暗号化されて送られる
+- 受け取ったら検証する
+
+```
+struct {
+opaque verify_data[Hash.length];
+} Finished;
+```
+
+```
+verify_data = HMAC(finished_key,
+Transcript-Hash(Handshake Context, Certificate*, CertificateVerify*))
+```
+
+## HMACについて
+
+## 鍵スケジュール(HKDF)
 
 ## まとめ
 
