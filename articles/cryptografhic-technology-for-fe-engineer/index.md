@@ -152,21 +152,61 @@ TODO: 図
     - TLS_CHACHA20_POLY1305_SHA256
     - TLS_AES_128_CCM_SHA256
     - TLS_AES_128_CCM_8_SHA256
-- Extensionsフィールド
+- Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
+
   - 付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
   - Extension: supported_groups
-    - 提案する鍵交換アルゴリズムを順番に並べます。TLS1.3では前方秘密(PFS)があるDHEおよびECDHEのみ使用可能なのでRSAや静的DHは使えなません。
+    - クライアントがサポートする鍵交換アルゴリズムを順番に並べます。TLS1.3では前方秘密(PFS)があるDHEおよびECDHEのみ使用可能なのでRSAや静的DHは使えなません。
   - Extension: key_share
     - 鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで任意数提供します。
   - supported_versions
-    - 本当のバージョン番号はここで提示されます
+    - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
 
 ## ServerHelloメッセージ
 
-- Clientとほぼ同じ構造
-- 決定した暗号スイートと鍵交換方式などをクライアントに返す
+[RFC8446 section-4.1.3](https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.3)
 
-## 鍵交換方式DHEの仕組み
+
+ClientからのClientHelloメッセージをサーバーが受け取ると暗号方式や秘密鍵共有方式を決定した上でほぼ同じ構造でServerHelloメッセージをクライアントに返します。
+- Randomフィールド
+  - 乱数生成器で作成する32バイトの値。
+- CipherSuiteフィールド
+  - クライアントから提案された暗号スイートから1つ選択する。
+- Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
+  - 付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
+  - Extension: key_share
+    - クライアントの「supported_groups」拡張で示されいる鍵交換アルゴリズムから1つ選択し、鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで返します。
+  - supported_versions
+    - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
+
+## 鍵交換と鍵の導出
+
+[RFC8446 section-7](https://datatracker.ietf.org/doc/html/rfc8446#section-7)
+
+「安全な文通」セクションでは暗号化に使用する鍵交換(極秘情報の共有)を手渡しで行っていましたので、鍵交換において機密性と安全性がありました。  
+オンラインの通信ではどのように行われるのでしょうか? TLSではClientHelloメッセージの拡張フィールド(supported_groupsとkey_share)とServerHelloメッセージの拡張フィールド(key_share)で鍵交換を行ますが、このやりとりはまだ暗号化されていません。鍵を直接メッセージに含めると盗聴されてしまいます。
+そこで盗聴されて良い値を交換しその値からお互い計算して共通の鍵を作る方法が(EC)DHE鍵交換という仕組みです。
+
+(EC)DHE鍵交換の仕組みについて説明する前にに基となるDH鍵交換について説明します。
+
+DH鍵交換は乗の性質を使います。
+
+- (g^a)^b = g^ab = g^ba = (g^b)^a
+- ab が大きいと g^ab が大きくなりすぎるので、予め決めた n で割った余りを考える
+- A = g^a mod n, B = g^b mod n, A^b ≡ B^a (mod n)
+
+↑ がこの関係式が鍵共有のポイント ↓ べき乗の性質を利用した鍵共有方法
+
+1. アリスとボブで g と n を固定する。g と n は公開されても良い値
+2. アリスは秘密値 a を決めて、A = g^a mod n をボブに渡す
+3. ボブは秘密値 b を決めて、B = g^b mod n をアリスに渡す
+4. アリスはボブからもらった B から s = B^a mod n を求める
+5. ボブはアリスからもらった A から s' = A^b mod n を求める
+6. s = s' = g^ab mod n になり同じ値を共有できる(共通暗号の秘密鍵)
+
+a を決めて g^a mod n の計算は簡単だが、g と n がわかった状態でも g^a mod n となる a を求めるのは困難 <= 1 方向性関数
+n が 600 桁以上の素数である条件を満たしていたら、現在に存在するどんなスーパーコンピューターでも解けないと予測されている
+
 
 TODO
 https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/  
@@ -174,8 +214,6 @@ https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/
 https://datatracker.ietf.org/doc/html/rfc7919
 
 - DH鍵交換とHKDF(鍵導入)でPS(前方秘匿性)が得られる
-
-## 暗号スイートAES_GCMの仕組み
 
 ## Certificateメッセージ
 
@@ -220,7 +258,7 @@ struct {
 
 - 同様にハンドシェイクの一連のメッセージの完全性を検証
 - verify_dataはトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュール(HKDF)
-  で生成したbaseKeyのclient_handshake_traffic_secretをfinished_keyにしてHMACしたMAC値
+  で生成したbaseKeyのclient_handshake_traffic_secretをfinished_keyにしてHMACしたMAC値(https://datatracker.ietf.org/doc/html/rfc8446#section-4.4)
 - 暗号化されて送られる
 - 受け取ったら検証する
 
