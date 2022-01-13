@@ -213,8 +213,11 @@ console.log(X === Y) // true
 気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。 
 感激ですよね。
 
+DHE、chromeで非推薦?? ECDHEが主流らしい
+
 
 TODO
+https://jovi0608.hatenablog.com/entry/2018/05/09/213703
 https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/  
 これ読む。 DHEパラメータの仕様
 https://datatracker.ietf.org/doc/html/rfc7919
