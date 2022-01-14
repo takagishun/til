@@ -194,10 +194,14 @@ ClientからのClientHelloメッセージをサーバーが受け取ると暗号
 DH鍵交換はべき乗の次の性質を使います。
 ※慣れ親しいjavascriptで書いてみます
 ``` javascript
-const A = g ** a % n
-const B = g ** b % n
-const X = A ** b % n
-const Y = B ** a % n
+const g = 2 // 公開されている値
+const n = 3 // 公開されている値
+const a = 10 // アリスだけしか知らない秘密鍵
+const b = 12 // ボブだけしか知らない秘密鍵
+const A = g ** a % n // 盗聴されても良い
+const B = g ** b % n // 盗聴されても良い
+const X = A ** b % n // 共有鍵(秘密鍵)
+const Y = B ** a % n // 共有鍵(秘密鍵)
 console.log(X === Y) // true
 ```
 
@@ -210,52 +214,57 @@ console.log(X === Y) // true
 5. ボブはAをb乗してnで割った余りを求めYとします
 6. X===Yになるのでこれを秘密鍵として共有します
 
-気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。 
-感激ですよね。
+気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。
+(EC)DHEのEはEphemeralで一時的な鍵のことを示しており、お互いの秘密鍵(例でいうa,b)をハンドシェイク毎に違うものを使用します。これによってPFS(前方秘匿性)を持つことができます。
 
-DHE、chromeで非推薦?? ECDHEが主流らしい
+ここまで説明しておいてあれですが、DHEよりECDHEの方が処理が高速で、ECDHEを使用することが推薦されているようです
+ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難しくて自分は説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
+
+さてここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。
+TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
 
 
-TODO
-https://jovi0608.hatenablog.com/entry/2018/05/09/213703
-https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/  
 これ読む。 DHEパラメータの仕様
 https://datatracker.ietf.org/doc/html/rfc7919
 
 - DH鍵交換とHKDF(鍵導入)でPS(前方秘匿性)が得られる
 
+
 ## EncryptedExtensions
+
+鍵交換や暗号化を確率するための拡張以外のものを送信します。このメッセージからこれまでの鍵共有と鍵導入で求められた鍵で暗号化して送ります。
 
 ## Certificateメッセージ
 
-- 証明書の送信
-- 認証。真正性。
-- 基本サーバー証明書のみ
-- 暗号化されて送られる
+前述した通り鍵交換をしている相手が本当に想定している相手を認証するために、Certificateメッセージでサーバー証明書とそのチェーンの中間証明書を送信します。受け取ったクライアントはOSに組み込まれているルートCA証明書を使って、それぞれの証明書の正当性を検証します。
+この証明書を使った認証や検証の仕組みを公開鍵基盤といいます。詳しくはこちらの記事を参照ください。
+TODO: 
 
-## 証明書の検証
+- 署名アルゴリズム
+  - ClientHello/ServerHelloの拡張のsignature_algorithmsに記載されるもの
 
-- OSに用意されたルートCA証明書を利用して、サーバ証明書を本物かどうか検証する
-- 証明書の検証手順
-  - https://datatracker.ietf.org/doc/html/rfc5280
+証明書の検証手順は次のRFCに記載されています  
+https://datatracker.ietf.org/doc/html/rfc5280
 
 ## CertificateVerifyメッセージ
 
-- サーバー証明書の秘密鍵を保持していることの証明をするためのメッセージ
-- 暗号化されて送られる
-- 署名対象コンテンツ
-  - トランスクリプトハッシュ
-    - 各ハンドシェイクメッセージの連結のハッシュを計算
+CertificateVerifyメッセージはサーバー証明書に対応する秘密鍵を保持していることの証明をするためのメッセージです。
+このメッセージにはデジタル署名とその署名アルゴリズムが含まれ暗号化されて送られます。
+このデジタル署名の内容は次の通りです
+- デジタル署名対象コンテンツ
+  - トランスクリプトハッシュ + いくつかの文字列
+    - トランスクリプトハッシュとは、これまでのハンドシェイクメッセージとそのヘッダーを連結して合意した暗号スイートに含まれるハッシュアルゴリズムでハッシュ化したもの
 - 署名に使用される秘密鍵
-  - サーバー証明書の秘密鍵
-- このメッセージを受け取ったクライアントは、サーバー証明書の公開鍵で検証する
+  - Certificateメッセージで送信したサーバー証明書に対応する秘密鍵
+- 署名アルゴリズム
+  - ClientHelloメッセージの拡張フィールドのsignature_algorithmsに記載されたものから選択
 
-```
-struct {
-    SignatureScheme algorithm;
-    opaque signature<0..2^16-1>;
-} CertificateVerify;
-```
+## デジタル署名の検証
+CertificateVerifyメッセージを受け取ったクライアントは、デジタル署名の正当性をサーバー証明書の公開鍵で検証する。
+検証方法は次の通りです。
+1. CertificateVerifyメッセージのデジタル署名をCertificateメッセージで受け取ったサーバー証明書の公開鍵を使ってデジタル署名対象コンテンツを取り出す
+2. クライアントでも同じ方法でデジタル署名対象コンテンツを求める
+3. 1と2が同じか検証する
 
 ## Server Finishedメッセージ
 
@@ -294,9 +303,16 @@ TODO
 
 # RFC
 
-TLS1.2: https://datatracker.ietf.org/doc/html/rfc5246
-TLS1.3: https://datatracker.ietf.org/doc/html/rfc8446
-暗号と認証の仕組みがわかる教科書 プロフェッショナルSSL/TLS 暗号技術入門 【図解】ネットワーク/サーバ/セキュリティの基礎から応用まで
+TLS1.2: https://datatracker.ietf.org/doc/html/rfc5246  
+TLS1.3: https://datatracker.ietf.org/doc/html/rfc8446  
+DHEパラメータ: https://datatracker.ietf.org/doc/html/rfc7919  
+暗号と認証の仕組みがわかる教科書   
+プロフェッショナルSSL/TLS   
+暗号技術入門  
+
+# 参考
+https://jovi0608.hatenablog.com/entry/2018/05/09/213703
+https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/
 
 
 
