@@ -220,15 +220,53 @@ console.log(X === Y) // true
 ここまで説明しておいてあれですが、DHEよりECDHEの方が処理が高速で、ECDHEを使用することが推薦されているようです
 ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難しくて自分は説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
 
-さてここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。
-TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
+さてここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。 TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
 
+TLSでは交換した鍵をそのまま暗号化に利用しません。HKDFという関数を通して用途別の鍵を新たに作成しそれを利用します。  
+HKDFでは2つの工程から鍵を作成します。
+
+- 抽出: 入力された鍵の素材から固定長の疑似乱数鍵K(PRK)を作成する工程
+- 拡張: 鍵Kから複数の追加疑似乱数鍵を作成する工程
+
+「抽出」はHKDF-Extract関数で行い、ソルトと鍵材料をHMACして求められます。HMACで使われるハッシュは暗号スイートで指定したハッシュアルゴリズムです。
+
+```typescript
+// salt: ソルト(乱数)
+// IKM: 鍵材料(DHEで共有した鍵など)
+PRK = HMAC_Hash(salt, IKM)
+```
+
+※HMACの詳細: [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
+
+「拡張」はHKDF-Expand関数で行われます。
+
+[RFC5869](https://datatracker.ietf.org/doc/html/rfc5869)
+
+HMACについて
+[RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
+
+```typescript
+type Length = number // 0 ~ 65535
+type Label = string // "tls13 " + Label 7~255文字
+type Context = string // 0~255文字
+type HkdfLabel = {
+  length: Length
+  label: Label
+  context: Context 
+};
+
+// HKDFのデフォルト関数
+const HKDF_Expand = (secret: any, hkdfLabel: HkdfLabel, length: Length) => 
+
+// TLSで定義されるラップ関数
+const HKDF_Expand_Label = (secret, label: Label, context: Context, length: Length) => HKDF_Expand(secret, hkdfLabel, length)
+const Derive_Secret  = (Secret, Label, Messages) => HKDF_Expand_Label(Secret, Label, Transcript_Hash(Messages), Hash.length)
+```
 
 これ読む。 DHEパラメータの仕様
 https://datatracker.ietf.org/doc/html/rfc7919
 
 - DH鍵交換とHKDF(鍵導入)でPS(前方秘匿性)が得られる
-
 
 ## EncryptedExtensions
 
