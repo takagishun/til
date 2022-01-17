@@ -228,16 +228,12 @@ ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難し
 
 > HKDF(HMAC-based key derivation function)【 [RFC5869](https://datatracker.ietf.org/doc/html/rfc5869) 】
 >
-> HKDFでは2つの工程から鍵を作成します。
-> - 抽出: ソルト(非秘密乱数)と鍵材料をHMACしてPRK求められます疑似乱数鍵(PRK)を作成する
-> - 拡張: PRKから複数の追加疑似乱数鍵を作成する
+> HKDFでは強力な疑似乱数鍵Kを一つ作成する抽出工程と、Kから複数の追加疑似乱数鍵を作成する拡張工程を経て鍵を作成します。
 >
-> 「抽出」はHKDF-Extract関数で行い、ソルトという乱数と鍵材料をHMACしてPRK求められます。
-> ```typescript
-> // salt: ソルト(非秘密乱数)
-> // IKM: 鍵材料(DHEで共有した鍵など)
-> PRK = HMAC-Hash(salt, IKM)
-> ```
+> 抽出工程はHKDF-Extract関数で行われ、PRKはソルト(あるいは空文字)と鍵材料をinputにしたHMACで求められます。
+>
+> 拡張(HKDF-Expand関数)では、抽出工程で求めたPRK、アプリケーション固有の情報、出力長をinputに...TODO
+
 
 
 > メッセージ認証コード(MAC: Message Authentication Code) 【 [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104) 】
@@ -254,16 +250,7 @@ ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難し
 > MAC値の計算にSHA-256のようなハッシュ関数を利用する方法を **HMAC** といいます。
 
 
-HMACで使われるハッシュは暗号スイートで指定したハッシュアルゴリズムです。
-
-※HMACの詳細: [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
-
-「拡張」はHKDF-Expand関数で行われます。
-
-[RFC5869](https://datatracker.ietf.org/doc/html/rfc5869)
-
-HMACについて
-[RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
+HKDFのHMACで使われるハッシュは暗号スイートで指定したハッシュアルゴリズムです。 TLSではHKDFのHKDF-Expand関数をラップして使用しています。
 
 ```typescript
 type Length = number // 0 ~ 65535
@@ -283,10 +270,6 @@ const HKDF_Expand_Label = (secret, label: Label, context: Context, length: Lengt
 const Derive_Secret  = (Secret, Label, Messages) => HKDF_Expand_Label(Secret, Label, Transcript_Hash(Messages), Hash.length)
 ```
 
-これ読む。 DHEパラメータの仕様
-https://datatracker.ietf.org/doc/html/rfc7919
-
-- DH鍵交換とHKDF(鍵導入)でPS(前方秘匿性)が得られる
 
 ## EncryptedExtensions
 
