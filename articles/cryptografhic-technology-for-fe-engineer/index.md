@@ -189,56 +189,45 @@ ClientからのClientHelloメッセージをサーバーが受け取ると暗号
 
 (EC)DHE鍵交換の仕組みについて説明する前にに基となるDH鍵交換について説明します。
 
-[ディフィー・ヘルマン鍵共有  ウィキペディア（Wikipedia）](https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%A3%E3%83%95%E3%82%A3%E3%83%BC%E3%83%BB%E3%83%98%E3%83%AB%E3%83%9E%E3%83%B3%E9%8D%B5%E5%85%B1%E6%9C%89)
+> #### [ディフィー・ヘルマン鍵共有  ウィキペディア（Wikipedia）](https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%A3%E3%83%95%E3%82%A3%E3%83%BC%E3%83%BB%E3%83%98%E3%83%AB%E3%83%9E%E3%83%B3%E9%8D%B5%E5%85%B1%E6%9C%89)
+> DH鍵交換はべき乗の次の性質を使います。
+> ※慣れ親しいjavascriptで書いてみます
+> ``` javascript
+> const g = 2 // 公開されている値
+> const n = 3 // 公開されている値
+> const a = 10 // アリスだけしか知らない秘密鍵
+> const b = 12 // ボブだけしか知らない秘密鍵
+> const A = g ** a % n // 盗聴されても良い
+> const B = g ** b % n // 盗聴されても良い
+> const X = A ** b % n // 共有鍵(秘密鍵)
+> const Y = B ** a % n // 共有鍵(秘密鍵)
+> console.log(X === Y) // true
+> ```
+> 
+> この性質を利用したのがDH鍵共有の方法です。
+> 1. 自分しか知らない値としてアリスがaをボブがbを持ち、gとnは誰でも知って良い値とします。
+> 2. アリスはgのa乗してnで割った余りAをボブに渡します。
+> 3. ボブはgのb乗してnで割った余りBをアリスに渡します。
+> 4. アリスはBをa乗してnで割った余りを求めXとします
+> 5. ボブはAをb乗してnで割った余りを求めYとします
+> 6. X===Yになるのでこれを秘密鍵として共有します
+>
+> 気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。
+> (EC)DHEのEはEphemeralで一時的な鍵のことを示しており、お互いの秘密鍵(例でいうa,b)をハンドシェイク毎に違うものを使用します。これによってPFS(前方秘匿性)を持つことができます。
+>
+> ここまで説明しておいてあれですが、DHEよりECDHEの方が処理が高速で、ECDHEを使用することが推薦されているようです
+> ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難しくて自分は説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
 
-DH鍵交換はべき乗の次の性質を使います。
-※慣れ親しいjavascriptで書いてみます
-``` javascript
-const g = 2 // 公開されている値
-const n = 3 // 公開されている値
-const a = 10 // アリスだけしか知らない秘密鍵
-const b = 12 // ボブだけしか知らない秘密鍵
-const A = g ** a % n // 盗聴されても良い
-const B = g ** b % n // 盗聴されても良い
-const X = A ** b % n // 共有鍵(秘密鍵)
-const Y = B ** a % n // 共有鍵(秘密鍵)
-console.log(X === Y) // true
-```
-
-この性質を利用したのがDH鍵共有の方法です。
-
-1. 自分しか知らない値としてアリスがaをボブがbを持ち、gとnは誰でも知って良い値とします。
-2. アリスはgのa乗してnで割った余りAをボブに渡します。
-3. ボブはgのb乗してnで割った余りBをアリスに渡します。
-4. アリスはBをa乗してnで割った余りを求めXとします
-5. ボブはAをb乗してnで割った余りを求めYとします
-6. X===Yになるのでこれを秘密鍵として共有します
-
-気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。
-(EC)DHEのEはEphemeralで一時的な鍵のことを示しており、お互いの秘密鍵(例でいうa,b)をハンドシェイク毎に違うものを使用します。これによってPFS(前方秘匿性)を持つことができます。
-
-ここまで説明しておいてあれですが、DHEよりECDHEの方が処理が高速で、ECDHEを使用することが推薦されているようです
-ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難しくて自分は説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
-
-さてここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。 TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
+ここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。 TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
 
 ## 鍵導出
 
-ここまでで(EC)DHE鍵交換を通して鍵を共有できましたが、TLSではこの鍵をそのまま暗号化に利用しません。HKDFという関数を通して用途別の鍵を新たに作成しそれを利用します。
+ここまでで(EC)DHE鍵交換を通して鍵を共有できましたが、TLSではこの鍵をそのまま暗号化に利用しません。    
+HKDFという技術を通してハンドシェイク毎に変わるより安全な鍵を複数作成し用途に応じてそれぞれを利用します。
 
-> HKDF(HMAC-based key derivation function)【 [RFC5869](https://datatracker.ietf.org/doc/html/rfc5869) 】
+> #### メッセージ認証コード（MAC: Message Authentication Code） 【 [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104) 】
 >
-> HKDFでは強力な疑似乱数鍵Kを一つ作成する抽出工程と、Kから複数の追加疑似乱数鍵を作成する拡張工程を経て鍵を作成します。
->
-> 抽出工程はHKDF-Extract関数で行われ、PRKはソルト(あるいは空文字)と鍵材料をinputにしたHMACで求められます。
->
-> 拡張(HKDF-Expand関数)では、抽出工程で求めたPRK、アプリケーション固有の情報、出力長をinputに...TODO
-
-
-
-> メッセージ認証コード(MAC: Message Authentication Code) 【 [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104) 】
->
-> MACとは受信したメッセージが改竄されてないことやなりすましがないことを確認できる技術です。   
+> MACとはメッセージに認証機能を持たせる技術です。MACを利用することで受信したメッセージが改竄されてないことやなりすましがないことを確認できます。   
 > MACは次の手順によって実現されます。
 > 1. ボブは、アリスと共有した秘密鍵と送信したいメッセージをinputに固定ビット長(MAC値)を計算します。
 > 2. ボブはMAC値とメッセージをアリスに送信します。
@@ -249,26 +238,37 @@ ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難し
 >
 > MAC値の計算にSHA-256のようなハッシュ関数を利用する方法を **HMAC** といいます。
 
+> #### HKDF（HMAC-based key derivation function）【 [RFC5869](https://datatracker.ietf.org/doc/html/rfc5869) 】
+>
+> HKDFとはHMACをベースとしていくつかの入力から1つまたは複数の暗号的に強い秘密鍵を作成する技術です。
+> 強力な疑似乱数鍵(PRK)を一つ作成する抽出工程と、PRKから複数の追加疑似乱数鍵(OKM)を作成する拡張工程を経て鍵を作成します。
+>
+> 抽出：
+> ソルト(あるいは空文字)とメッセージ(鍵材料)を引数に持ったHKDF-Extractという関数で行われ、この２つの引数のHMACを計算してPRKを求めます。
+> 
+> 拡張：
+> 抽出工程で求めたPRK、アプリケーション固有の情報(context)、出力長を引数に持ったHKDF-Expandという関数で行われ、内部でHMACを使用して鍵(OKM)を求めます。contextを変更することで任意数の鍵を作成できます。
+> 
 
-HKDFのHMACで使われるハッシュは暗号スイートで指定したハッシュアルゴリズムです。 TLSではHKDFのHKDF-Expand関数をラップして使用しています。
 
-```typescript
-type Length = number // 0 ~ 65535
-type Label = string // "tls13 " + Label 7~255文字
-type Context = string // 0~255文字
-type HkdfLabel = {
-  length: Length
-  label: Label
-  context: Context 
-};
 
-// HKDFのデフォルト関数
-const HKDF_Expand = (secret: any, hkdfLabel: HkdfLabel, length: Length) => 
+HKDF内のHMACで使われるハッシュ関数は暗号スイートで指定したハッシュアルゴリズムを利用します。  
+「TLS_AES_128_GCM_SHA256」の場合は、SHA256がハッシュアルゴリズムです。
 
-// TLSで定義されるラップ関数
-const HKDF_Expand_Label = (secret, label: Label, context: Context, length: Length) => HKDF_Expand(secret, hkdfLabel, length)
-const Derive_Secret  = (Secret, Label, Messages) => HKDF_Expand_Label(Secret, Label, Transcript_Hash(Messages), Hash.length)
+TLSではHKDFの拡張工程であるHKDF-Expand関数をラップしたDerive-Secret関数を利用しており、HKDF-Expand関数に引数であるcontextにトランスクリプトハッシュ(後述)を含めるような仕組みになっています。
+
 ```
+struct {
+  uint16 length = Length;
+  opaque label<7..255> = "tls13 " + Label;
+  opaque context<0..255> = Context;
+} HkdfLabel;
+HKDF-Expand-Label(PRK, Label, Context, Length) = HKDF-Expand(PRK, HkdfLabel, Length)
+Derive-Secret(PRK, Label, Messages) = HKDF-Expand-Label(PRK, Label, Transcript-Hash(Messages), Hash.length)
+```
+
+TLSのHKDFを利用した鍵導入プロセスとそこれ作成される鍵の詳細は[RFC8446 section-7.1 Key Schedule](https://datatracker.ietf.org/doc/html/rfc8446#section-7.1)
+をご参照ください
 
 
 ## EncryptedExtensions
