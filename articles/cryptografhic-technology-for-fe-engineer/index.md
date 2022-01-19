@@ -112,33 +112,32 @@ TLSではレコード(サイズは16384バイト)と呼ばれる単位でデー�
 
 <img src="./handshake.jpg" width="500">
 
-このフルハンドシェイクでは、まずClientHelloメッセージとServerHelloメッセージ
+このフルハンドシェイクでは、まずClientHelloメッセージとServerHelloメッセージで暗号方式の合意と利用する鍵共有を行います。
 
 ## ClientHelloメッセージ
 
 [RFC8446 section-4.1.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.2)
 
-クライアントが最初にサーバーに接続するとき、クライアントが望む暗号方式や秘密鍵共有方式を提案(同時に秘密鍵共有に必要なデータも送っています)するためにClientHelloメッセージを最初のTLSメッセージとして送信する必要があります。
-このメッセージに必要なフィールドはRandom・CipherSuite・Extensionsの3つです。 実際のデータには他にもフィールドがありますが、後方互換性などのためでありTLS1.3では利用しないことになっています。例えばversionフィールドに0x0303（TLS 1.2のバージョン番号）とありますが、本当のバージョンはExtensionフィールドのsupported_versionsに記載されています。
-- Randomフィールド
-  - 乱数生成器で作成する32バイトの値でハンドシェイクメッセージが一意になります。
-- CipherSuiteフィールド
-  - クライアントが対応可能な暗号スイートを優先度順に提示します
-  - 暗号スイートは、暗号化アルゴリズム名と後述するHKDFなどで使用されるハッシュアルゴリズム名で構成され「TLS_暗号アルゴリズム名_秘密鍵の長さ_暗号化モード名_ハッシュ名」という形で表現されます
-  - TLS1.3で使える暗号スイートは5つのみで、どれもAEAD(認証付き暗号)です。
-    - TLS_AES_128_GCM_SHA256
-    - TLS_AES_256_GCM_SHA384
-    - TLS_CHACHA20_POLY1305_SHA256
-    - TLS_AES_128_CCM_SHA256
-    - TLS_AES_128_CCM_8_SHA256
-- Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
-  - このフィールドには付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
-  - Extension: supported_groups
-    - クライアントがサポートする鍵交換アルゴリズムを順番に並べます。TLS1.3では前方秘密(PFS)があるDHEおよびECDHEのみ使用可能なのでRSAや静的DHは使えなません。
-  - Extension: key_share
-    - 鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで任意数提供します。
-  - supported_versions
-    - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
+ClientHelloメッセージはクライアントからサーバーに送信する最初のメッセージです。このメッセージに必要なフィールドはRandom・CipherSuite・Extensionsの3つです。 実際のデータには他にもフィールドがありますが、後方互換性などのためでありTLS1.3では利用しないことになっています。例えばversionフィールドに0x0303（TLS 1.2のバージョン番号）とありますが、本当のバージョンはExtensionフィールドのsupported_versionsに記載されています。 
+### Randomフィールド
+乱数生成器で作成する32バイトの値でハンドシェイクメッセージが一意になります。 
+### CipherSuiteフィールド
+    - クライアントが対応可能な暗号スイートを優先度順に提示します
+    - 暗号スイートは、暗号化アルゴリズム名と後述するHKDFなどで使用されるハッシュアルゴリズム名で構成され「TLS_暗号アルゴリズム名_秘密鍵の長さ_暗号化モード名_ハッシュ名」という形で表現されます
+    - TLS1.3で使える暗号スイートは5つのみで、どれもAEAD(認証付き暗号)です。
+      - TLS_AES_128_GCM_SHA256
+      - TLS_AES_256_GCM_SHA384
+      - TLS_CHACHA20_POLY1305_SHA256
+      - TLS_AES_128_CCM_SHA256
+      - TLS_AES_128_CCM_8_SHA256
+  - Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
+    - このフィールドには付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
+    - Extension: supported_groups
+      - クライアントがサポートする鍵交換アルゴリズムを順番に並べます。TLS1.3では前方秘密(PFS)があるDHEおよびECDHEのみ使用可能なのでRSAや静的DHは使えなません。
+    - Extension: key_share
+      - 鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで任意数提供します。
+    - supported_versions
+      - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
 
 ## ServerHelloメッセージ
 
