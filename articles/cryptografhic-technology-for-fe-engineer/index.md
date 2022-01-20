@@ -30,7 +30,7 @@ TLSでは、情報セキュリティの中でも機密性、安全性、真正�
 <tr>
 <td>機密性</td>
 <td>認可した人以外はアクセスできない事。秘匿性。</td>
-<td>共通鍵暗号</td>
+<td>共通鍵暗号、公開鍵暗号</td>
 </tr>
 <tr>
 <td>安全性</td>
@@ -68,9 +68,9 @@ TLSでは、情報セキュリティの中でも機密性、安全性、真正�
 この例では、強度はひとまず置いといて、一応機密性、安全性、真正性を考慮した設計になっています。
 要点をまとめると次のようになります
 
-- 暗号方式は安全か
-- 暗号化するための秘密鍵を安全な方法で共有できるか
-- 手紙の送り主が正しいか
+- 暗号化するための秘密鍵を安全に共有する(機密性、安全性、真正性)
+- 手紙の内容を暗号化する(機密性)
+- 手紙の改竄を検知できるようにする(安全性, 真正性)
 
 TLSで通信する場合でもポイントになる部分は似ています。 
 
@@ -102,17 +102,58 @@ TLSではレコード(サイズは16384バイト)と呼ばれる単位でデー�
 
 ハンドシェイクはセキュアな通信を実現するための準備です。主に認証・暗号化方式・共有鍵共有をするために使用され、クライアント/サーバー間で一連のやりとりが行われます。
 ハンドシェイクにはいくつか種類があるのですが、今回はサーバー認証を伴ったフルハンドシェイクについて説明します。
-
-ハンドシェイクのメッセージは３つのフィールドから構成されます。
-- ハンドシェイクタイプ
-  - ClientHello、ServerHelloなどハンドシェイクメッセージの種類が入ります。
-- メッセージ長
-- ハンドシェイクメッセージ
-  - ハンドシェイクタイプ毎に必要なデータが異なります。
+このフルハンドシェイクでは、まずClientHello・ServerHelloメッセージで暗号方式の合意と利用する鍵共有を行い、
+その後Certificate・CertificateVerify・Finishedメッセージで認証をします。
 
 <img src="./handshake.jpg" width="500">
 
-このフルハンドシェイクでは、まずClientHelloメッセージとServerHelloメッセージで暗号方式の合意と利用する鍵共有を行います。
+メッセージの詳細を見る前にオンライン通信における鍵共有の仕組みについて説明します。
+
+## 鍵共有
+
+[RFC8446 section-7](https://datatracker.ietf.org/doc/html/rfc8446#section-7)
+
+TLS1.3で使用される暗号方式は共通鍵暗号の一種であるAES(詳細は後述)というものです。共通鍵暗号とは暗号化と復号を同じ秘密鍵で行う暗号方法です。前述したシフト暗号や換字式暗号も共通鍵暗号の一種と言えます。
+「秘密の文通」ではその秘密鍵の共有を直接会って行っていましたので、鍵共有において機密性と安全性がありました。  
+しかしオンラインで実現するとなると仕組み上問題があります。なぜなら鍵共有の段階では暗号化はまだできていないので、安全ではない通信を利用して相手と鍵を共有しなければならないからです。
+そこで考えられたのがDH鍵共有と言う技術です。DH鍵共有では盗聴されて良い値を交換しその値からお互いに計算して共通の鍵を作ることができます。
+
+> ### ディフィー・ヘルマン(DH)鍵共有
+> [ウィキペディア（Wikipedia）](https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%A3%E3%83%95%E3%82%A3%E3%83%BC%E3%83%BB%E3%83%98%E3%83%AB%E3%83%9E%E3%83%B3%E9%8D%B5%E5%85%B1%E6%9C%89)
+> DH鍵共有はべき乗の次の性質を使います。
+> ※慣れ親しいjavascriptで書いてみます
+> ``` javascript
+> const g = 2 // 公開して良い値。
+> const n = 3 // 公開して良い値。
+> const a = 10 // アリスだけしか知らない秘密鍵
+> const b = 12 // ボブだけしか知らない秘密鍵
+> const A = g ** a % n // 公開して良い値
+> const B = g ** b % n // 公開して良い値
+> const X = A ** b % n // 共有鍵(秘密鍵)
+> const Y = B ** a % n // 共有鍵(秘密鍵)
+> console.log(X === Y) // true
+> ```
+>
+> この性質を利用したのがDH鍵共有の方法です。
+> 1. 自分しか知らない値としてアリスがaをボブがbを持ち、gとnは誰でも知って良い値とします。
+> 2. アリスはgのa乗してnで割った余りAをボブに渡します。
+> 3. ボブはgのb乗してnで割った余りBをアリスに渡します。
+> 4. アリスはBをa乗してnで割った余りを求めXとします
+> 5. ボブはAをb乗してnで割った余りを求めYとします
+> 6. X===Yになるのでこれを秘密鍵として共有します
+>
+> 気になるのはX,Yの安全性ですが、gを生成元、nを大きな素数(600桁以上)、aとbは1~(n-2)の範囲の整数という条件であれば、公開しているg,n,A,Bを通じて秘密鍵X、Yやa,bを求めることは難しいようです。
+
+TLSではこのDH鍵共有の仕組みを元にしたDHEやECDHEという鍵共有方法を採用しています。 
+
+> ### DHEとECDHE
+> (EC)DHEのEはEphemeralで一時的な鍵のことを示しており、セッション毎に一度共有した鍵を破棄して毎回違うものを使用します。そうすることである時点での秘密鍵が漏洩しても過去の通信の秘匿性は保たれます。これをPFS(前方秘匿性)といいます。
+>
+> ECDHEとは楕円曲線を用いた鍵共有方法です。DHEより後発に考えられた仕組みで、実はECDHEの方が処理が高速で、同じ安全性でも秘密鍵長が短かくて済むというメリットがあります。
+> 楕円曲線は自分にとってはとても難しくて今回説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
+
+ここまで鍵共有の仕組みを説明しました。TLS1.3のフルハンドシェイクではClientHelloメッセージとServerHelloメッセージによって鍵共有がされ、同時に暗号方式の合意も行なっています。
+それでは実際メッセージの詳細を見ていきましょう。
 
 ## ClientHelloメッセージ
 
@@ -122,89 +163,54 @@ ClientHelloメッセージはクライアントからサーバーに送信する
 ### Randomフィールド
 乱数生成器で作成する32バイトの値でハンドシェイクメッセージが一意になります。 
 ### CipherSuiteフィールド
-    - クライアントが対応可能な暗号スイートを優先度順に提示します
-    - 暗号スイートは、暗号化アルゴリズム名と後述するHKDFなどで使用されるハッシュアルゴリズム名で構成され「TLS_暗号アルゴリズム名_秘密鍵の長さ_暗号化モード名_ハッシュ名」という形で表現されます
-    - TLS1.3で使える暗号スイートは5つのみで、どれもAEAD(認証付き暗号)です。
-      - TLS_AES_128_GCM_SHA256
-      - TLS_AES_256_GCM_SHA384
-      - TLS_CHACHA20_POLY1305_SHA256
-      - TLS_AES_128_CCM_SHA256
-      - TLS_AES_128_CCM_8_SHA256
-  - Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
-    - このフィールドには付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
-    - Extension: supported_groups
-      - クライアントがサポートする鍵交換アルゴリズムを順番に並べます。TLS1.3では前方秘密(PFS)があるDHEおよびECDHEのみ使用可能なのでRSAや静的DHは使えなません。
-    - Extension: key_share
-      - 鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで任意数提供します。
-    - supported_versions
-      - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
+クライアントが対応可能な暗号スイートを優先度順に提示します。暗号スイートは、暗号化アルゴリズム名とHKDF(後述)などで使用されるハッシュアルゴリズム名で構成され「TLS_暗号アルゴリズム名_秘密鍵の長さ_暗号化モード名_ハッシュ名」という形で表現されます
+TLS1.3で使える暗号スイートは5つのみで、どれもAEAD(認証付き暗号)です。
+- TLS_AES_128_GCM_SHA256
+- TLS_AES_256_GCM_SHA384
+- TLS_CHACHA20_POLY1305_SHA256
+- TLS_AES_128_CCM_SHA256
+- TLS_AES_128_CCM_8_SHA256
+### Extensionsフィールド 
+[RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)  
+このフィールドには付加的なデータを運ぶ拡張が、任意の数だけ含まれます。鍵交換で使用する拡張は次の通りです。
+- Extension: supported_groups
+  - クライアントがサポートする鍵共有アルゴリズムを順番に並べます。
+    - X25519: Curve25519と言う楕円曲線を使用したECDHE鍵共有
+    - secp256r1
+    - secp384r1など
+- Extension: key_share
+  - 鍵共有アルゴリズム(group)と必要なパラメーター(Key Exchange)をセットで任意数提供します。
+- supported_versions
+  - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
 
 ## ServerHelloメッセージ
 
 [RFC8446 section-4.1.3](https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.3)
 
+ClientからのClientHelloメッセージをサーバーが受け取ると暗号方式や秘密鍵共有方式を決定した上でほぼ同じ構造でServerHelloメッセージをクライアントに返します。 
+### Randomフィールド
+乱数生成器で作成する32バイトの値。 
+### CipherSuiteフィールド
+ClientHelloメッセージで提案された暗号スイートから1つ選択する。 
+### Extensionsフィールド 
+付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
+- Extension: key_share
+  - ClientHelloメッセージのExtensions.supported_groupsで示されいる鍵交換アルゴリズムから1つ選択し、鍵交換アルゴリズム(group)と必要なパラメーター(Key Exchange)をセットで返します。
+- supported_versions
+  - TLSバージョン。ClientHelloメッセージで記載されているものから一つ選択する。
 
-ClientからのClientHelloメッセージをサーバーが受け取ると暗号方式や秘密鍵共有方式を決定した上でほぼ同じ構造でServerHelloメッセージをクライアントに返します。
-- Randomフィールド
-  - 乱数生成器で作成する32バイトの値。
-- CipherSuiteフィールド
-  - クライアントから提案された暗号スイートから1つ選択する。
-- Extensionsフィールド [RFC8446 section-4.2](https://datatracker.ietf.org/doc/html/rfc8446#section-4.2)
-  - 付加的なデータを運ぶ拡張が、任意の数だけ含まれます。
-  - Extension: key_share
-    - クライアントの「supported_groups」拡張で示されいる鍵交換アルゴリズムから1つ選択し、鍵交換アルゴリズム(group)とそれに必要な情報(Key Exchange)をセットで返します。
-  - supported_versions
-    - サポートされているTLSバージョンのリストが優先順に含まれており、最も優先されるバージョンが最初になります。
-
-## 鍵交換
-
-[RFC8446 section-7](https://datatracker.ietf.org/doc/html/rfc8446#section-7)
-
-「安全な文通」セクションでは暗号化に使用する鍵交換(極秘情報の共有)を手渡しで行っていましたので、鍵交換において機密性と安全性がありました。  
-それをオンラインで実現するにはどうすれば良いでしょうか? TLSではClientHelloメッセージの拡張フィールド(supported_groupsとkey_share)とServerHelloメッセージの拡張フィールド(key_share)で鍵交換を行ますが、このやりとりはまだ暗号化されていません。鍵を直接メッセージに含めると盗聴されてしまいます。
-そこで盗聴されて良い値を交換しその値からお互い計算して共通の鍵を作る方法が(EC)DHE鍵交換という仕組みです。※自分は最初そんな魔法のような方法があるのかって思ってました。 
-
-(EC)DHE鍵交換の仕組みについて説明する前にに基となるDH鍵交換について説明します。
-
-> #### [ディフィー・ヘルマン鍵共有  ウィキペディア（Wikipedia）](https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%A3%E3%83%95%E3%82%A3%E3%83%BC%E3%83%BB%E3%83%98%E3%83%AB%E3%83%9E%E3%83%B3%E9%8D%B5%E5%85%B1%E6%9C%89)
-> DH鍵交換はべき乗の次の性質を使います。
-> ※慣れ親しいjavascriptで書いてみます
-> ``` javascript
-> const g = 2 // 公開されている値
-> const n = 3 // 公開されている値
-> const a = 10 // アリスだけしか知らない秘密鍵
-> const b = 12 // ボブだけしか知らない秘密鍵
-> const A = g ** a % n // 盗聴されても良い
-> const B = g ** b % n // 盗聴されても良い
-> const X = A ** b % n // 共有鍵(秘密鍵)
-> const Y = B ** a % n // 共有鍵(秘密鍵)
-> console.log(X === Y) // true
-> ```
-> 
-> この性質を利用したのがDH鍵共有の方法です。
-> 1. 自分しか知らない値としてアリスがaをボブがbを持ち、gとnは誰でも知って良い値とします。
-> 2. アリスはgのa乗してnで割った余りAをボブに渡します。
-> 3. ボブはgのb乗してnで割った余りBをアリスに渡します。
-> 4. アリスはBをa乗してnで割った余りを求めXとします
-> 5. ボブはAをb乗してnで割った余りを求めYとします
-> 6. X===Yになるのでこれを秘密鍵として共有します
->
-> 気になるのはX,Yの安全性です。公開されて良いg,n,A,Bを通じてXとYが求められてしまうと安全ではないのですが、どうやらnが600桁以上といくつかの条件を満たすとどんなスーパーコンピューターでも計算するのが難しいと言われているそうです。
-> (EC)DHEのEはEphemeralで一時的な鍵のことを示しており、お互いの秘密鍵(例でいうa,b)をハンドシェイク毎に違うものを使用します。これによってPFS(前方秘匿性)を持つことができます。
->
-> ここまで説明しておいてあれですが、DHEよりECDHEの方が処理が高速で、ECDHEを使用することが推薦されているようです
-> ECDHEとは楕円曲線を用いた鍵共有方法です。楕円曲線は難しくて自分は説明できないのですが、公開して良い値から共有鍵をお互い計算できる点ではDHEと同じです。
-
-ここまでで鍵を共有で秘匿性はありますが、安全性はありません。鍵交換した相手が本物かどうか確かめる必要があります。 TLSでは後述のCertificateメッセージやCertificateVerifyメッセージでそれを実現します。
+これで鍵共有と暗号化方式の合意ができたので暗号化の準備が整いました。  
+しかしTLSでは(EC)DHE鍵交換を通して共有した鍵をそのまま暗号化に利用しません。    
+HKDFという技術でより安全な鍵を導入します。
 
 ## 鍵導出
+[RFC8446 section-7.1 Key Schedule](https://datatracker.ietf.org/doc/html/rfc8446#section-7.1)  
+HKDFについて触れる前に、その中で使用しているメッセージ認証コードについて説明します
 
-ここまでで(EC)DHE鍵交換を通して鍵を共有できましたが、TLSではこの鍵をそのまま暗号化に利用しません。    
-HKDFという技術を通してハンドシェイク毎に変わるより安全な鍵を複数作成し用途に応じてそれぞれを利用します。
-
-> #### メッセージ認証コード（MAC: Message Authentication Code） 【 [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104) 】
->
-> MACとはメッセージに認証機能を持たせる技術です。MACを利用することで受信したメッセージが改竄されてないことやなりすましがないことを確認できます。   
+> ### メッセージ認証コード（MAC: Message Authentication Code）
+> [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)  
+> メッセージを暗号化すると機密性は保たれますが安全性はありません。
+> MACとは通信メッセージに認証機能を持たせ安全性を確保する技術です。MACを利用することで受信したメッセージが改竄されてないことやなりすましがないことを確認できます。   
 > MACは次の手順によって実現されます。
 > 1. ボブは、アリスと共有した秘密鍵と送信したいメッセージをinputに固定ビット長(MAC値)を計算します。
 > 2. ボブはMAC値とメッセージをアリスに送信します。
@@ -215,24 +221,23 @@ HKDFという技術を通してハンドシェイク毎に変わるより安全�
 >
 > MAC値の計算にSHA-256のようなハッシュ関数を利用する方法を **HMAC** といいます。
 
-> #### HKDF（HMAC-based key derivation function）【 [RFC5869](https://datatracker.ietf.org/doc/html/rfc5869) 】
+このHMACをベースとしていくつかの入力から1つまたは複数の暗号的に強い秘密鍵を作成する技術がHKDFです。 
+メッセージの認証機能として使用されたHMACが鍵導入に使われるんですねちょっと不思議です。
+
+> ### HKDF（HMAC-based key derivation function）
+> [RFC5869](https://datatracker.ietf.org/doc/html/rfc5869)
 >
-> HKDFとはHMACをベースとしていくつかの入力から1つまたは複数の暗号的に強い秘密鍵を作成する技術です。
-> 強力な疑似乱数鍵(PRK)を一つ作成する抽出工程と、PRKから複数の追加疑似乱数鍵(OKM)を作成する拡張工程を経て鍵を作成します。
+> HKDFでは短いが暗号学的に強力な疑似乱数鍵(PRK)を一つ作成する抽出工程と、PRKから目的の長さの疑似乱数鍵(OKM)を必要なだけ作成する拡張工程があります。
 >
 > 抽出：
 > ソルト(あるいは空文字)とメッセージ(鍵材料)を引数に持ったHKDF-Extractという関数で行われ、この２つの引数のHMACを計算してPRKを求めます。
 > 
 > 拡張：
-> 抽出工程で求めたPRK、アプリケーション固有の情報(context)、出力長を引数に持ったHKDF-Expandという関数で行われ、内部でHMACを使用して鍵(OKM)を求めます。contextを変更することで任意数の鍵を作成できます。
-> 
-
-
+> 抽出工程で求めたPRK、アプリケーション固有の情報(context)、出力長を引数に持ったHKDF-Expandという関数で行われ、内部でHMACを使用して鍵(OKM)を作成します。contextを変更することで任意数の鍵を作成できます。
 
 HKDF内のHMACで使われるハッシュ関数は暗号スイートで指定したハッシュアルゴリズムを利用します。  
 「TLS_AES_128_GCM_SHA256」の場合は、SHA256がハッシュアルゴリズムです。
-
-TLSではHKDFの拡張工程であるHKDF-Expand関数をラップしたDerive-Secret関数を利用しており、HKDF-Expand関数に引数であるcontextにトランスクリプトハッシュ(後述)を含めるような仕組みになっています。
+TLSではHKDFの拡張工程であるHKDF-Expand関数をラップしたDerive-Secret関数を利用しており、HKDF-Expand関数に引数であるcontextにトランスクリプトハッシュを含めるような仕組みになっています。
 
 ```
 struct {
@@ -244,109 +249,116 @@ HKDF-Expand-Label(PRK, Label, Context, Length) = HKDF-Expand(PRK, HkdfLabel, Len
 Derive-Secret(PRK, Label, Messages) = HKDF-Expand-Label(PRK, Label, Transcript-Hash(Messages), Hash.length)
 ```
 
-TLSのHKDFを利用した鍵導入プロセスとそこれ作成される鍵の詳細は[RFC8446 section-7.1 Key Schedule](https://datatracker.ietf.org/doc/html/rfc8446#section-7.1)
-をご参照ください
+> ### トランスクリプトハッシュ
+> これまでのハンドシェイクメッセージとそのヘッダーを連結して合意した暗号スイートに含まれるハッシュアルゴリズムでハッシュ化したもの
+
+ここまででようやくメッセージを暗号化できる準備できました。これ以降のハンドシェイクメッセージは暗号化されて送られます。  
+実際次のメッセージについて見る前に、TLSで使用される暗号方式について説明しようと思います。
 
 ## 暗号化
 
-ここまででメッセージを暗号化できる準備できました。
+暗号方式はClientHelloとServerHelloで合意した暗号スイートに記載しているものです。TLS_AES_128_GCM_SHA256の場合はAES_128_GCMの部分です。
+tls1.3では指定できる暗号方式が認証付き暗号(AEAD)のみになりました。AES_GCMもAEADの1種です。
+暗号に使用する秘密鍵は前述したHKDFで計算された鍵を使用します。HKDFでは複数の鍵が作成されてますので、メッセージの種類によって使用する鍵が異なります。
 
-- 暗号化方式
-  - ClientHelloとServerHelloで合意した暗号スイートに記載
-  - TLS_AES_128_GCM_SHA256の場合はAES_128_GCMの部分
-- 暗号に使用する秘密鍵
-  - (EC)DHE鍵交換で共有したものを元にHKDFで計算されたもの
-  - 暗号化するメッセージによって使う秘密鍵が違う
-
-> #### 認証付き暗号 AES_128_GCM 【 [RFC5116](https://datatracker.ietf.org/doc/html/rfc5116) 】
+> ### 認証付き暗号(AEAD)
+> [RFC5116](https://datatracker.ietf.org/doc/html/rfc5116) 】
 > メッセージのやりとりでは機密性と安全性の両方を満たす必要があります。つまり許可されている人だけがメッセージの内容を読めるようにし、かつメッセージの変更や偽造がされていないことを保証する必要があります。
 > これまで説明した通り前者は暗号化で、後者はMACで実現できますが、暗号とMACの処理順序や組み合わせ、方式選択によってはセキュリティに問題が出てきてしまうため、それらを統一したアルゴリズムであるAEADが考えられました。
 > またパフォーマンスの観点でもメリットがあります。
-> AEADのAES_GCMとは、AES Galois/Counter Modeの略であり、暗号化にAESのcounter mode、認証部分にガロア体を使用します。
+> 
+> AES_GCMについて TODO
 
-## EncryptedExtensions
+## EncryptedExtensionsメッセージ
 
 鍵交換や暗号化を確率するための拡張以外のものを送信します。
 
 ## 認証
 
-ここまでで共通鍵が用意でき暗号化はできるようになりました。しかしそもそも鍵交換時に改竄やなりすましが行われていたとしたら意味がないので、鍵共有した相手が本物かどうかを認証する必要があります。
-Certificateメッセージ、CertificateVerifyメッセージ、Finishedメッセージによって認証します。
+暗号化はできるようになりましたが、まだハンドシェイクでやるべきことがあります。それは通信相手(今回の場合はサーバー)の認証です。そもそも鍵交換時に改竄やなりすましが行われていたとしたら意味がないので、鍵共有した相手が本物かどうかを認証する必要があります。
+TLS1.3では証明書を使用した認証を採用しており、Certificateメッセージ、CertificateVerifyメッセージによって行われます。
+
+> ### 証明書と公開鍵基盤(PKI)
+> 
+> 
+> 
+> 
+> 
 
 ## Certificateメッセージ
 
-暗号化できるようになりましたが、そもそも鍵交換をしている相手が本当に想定している相手かどうか認証するために、Certificateメッセージでサーバー証明書とそのチェーンの中間証明書を送信します。受け取ったクライアントはOSに組み込まれているルートCA証明書を使って、それぞれの証明書の正当性を検証します。
-この証明書を使った認証や検証の仕組みを公開鍵基盤といいます。 証明書の署名に使用するアルゴリズムはClientHello/ServerHelloの拡張のsignature_algorithmsに記載されるものです。
+[RFC8446 section-4.4.2 Certificate](https://datatracker.ietf.org/doc/html/rfc8446#section-4.4.2) 
+
+Certificateメッセージでサーバー証明書とそのチェーンの中間証明書を送信します。証明書の署名に使用するアルゴリズムはClientHelloメッセージのExtensions.signature_algorithms_cert(あるいはsignature_algorithms)に記載されるものです。
+受け取ったクライアントはOSやブラウザに組み込まれているルートCA証明書を使って、それぞれの証明書の正当性を検証します。
 
 証明書を受信した場合の検証手順は次のRFCに記載されています  
 https://datatracker.ietf.org/doc/html/rfc5280
 
 ## CertificateVerifyメッセージ
+[RFC8446 section-4.4.3 Certificate Verify](https://datatracker.ietf.org/doc/html/rfc8446#section-4.4.3)  
+
 CertificateVerifyメッセージはサーバー証明書に対応する秘密鍵を保持していることの証明をするためのメッセージです。また今までのハンドシェイクメッセージの整合性も保証します。
-このメッセージにはデジタル署名とその署名アルゴリズムが含まれ暗号化されて送られます。
-このデジタル署名の内容は次の通りです
+このメッセージに含まれるフィールドはalgorithmとsignatureフィールドです
+
+### algorithmフィールド
+使用される署名アルゴリズムを指定します。
+証明書の署名に使用するアルゴリズムはClientHelloメッセージのExtensions.signature_algorithms_cert(あるいはsignature_algorithms)に記載されるものから選択します。
+
+### signatureフィールド
+algorithmフィールドで指定したアルゴリズムを使用したデジタル署名です。
+このデジタル署名の内容は次の通りです。
 - デジタル署名対象コンテンツ
   - トランスクリプトハッシュ + いくつかのデータ
-    - トランスクリプトハッシュとは、これまでのハンドシェイクメッセージとそのヘッダーを連結して合意した暗号スイートに含まれるハッシュアルゴリズムでハッシュ化したもの
 - 署名に使用される秘密鍵
   - Certificateメッセージで送信したサーバー証明書に対応する秘密鍵
 - 署名アルゴリズム
   - ClientHelloメッセージの拡張フィールドのsignature_algorithmsに記載されたものから選択
 
-トランスクリプトハッシュをサーバー証明書秘密鍵で署名し、サーバー証明書の公開鍵で検証することで、ハンドシェイクが改竄されていたことを検知できます
-ハンドシェイクメッセージが1ビットでも違えばトランスクリプトハッシュも異なるからです。
-
-## デジタル署名の検証
-
-CertificateVerifyメッセージを受け取ったクライアントは、デジタル署名の正当性をサーバー証明書の公開鍵で検証する。 検証方法は次の通りです。
+CertificateVerifyメッセージを受け取ったクライアントは、デジタル署名の正当性をサーバー証明書の公開鍵で検証します。
 
 1. CertificateVerifyメッセージのデジタル署名をCertificateメッセージで受け取ったサーバー証明書の公開鍵を使ってデジタル署名対象コンテンツを取り出す
 2. クライアントでも同じ方法でデジタル署名対象コンテンツを求める
 3. 1と2が同じか検証する
 
-## Server Finishedメッセージ
+署名する対象にトランスクリプトハッシュを含めるのがミソです。 クライアントとサーバーで保管しているハンドシェイクが1ビットでも違えばトランスクリプトハッシュも異なるので、ハンドシェイクが改竄されていたことを検知できます。
 
-- ハンドシェイクの一連のメッセージの完全性を検証
-- verify_dataはトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュール(HKDF)
-  で生成したbaseKeyのserver_handshake_traffic_secretをfinished_keyにしてHMACした値
-- 暗号化されて送られる
-- 受け取ったら検証する
+## Finishedメッセージ
 
-## Client Finishedメッセージ
+Certificate・CertificateVerifyメッセージを含めたハンドシェイクの一連のメッセージの完全性を検証します。
+verify_dataフィールドにトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュールで生成した鍵の一つ(server_handshake_traffic_secret)をHMACした値を入れます。
+メッセージ受信者は同等の方法でverify_dataを作成し検証します。
 
-- 同様にハンドシェイクの一連のメッセージの完全性を検証
-- verify_dataはトランスクリプトハッシュ(Client Hello~CertificateVerify)と鍵スケジュール(HKDF)
-  で生成したbaseKeyのclient_handshake_traffic_secretをfinished_keyにしてHMACしたMAC値(https://datatracker.ietf.org/doc/html/rfc8446#section-4.4)
-- 暗号化されて送られる
-- 受け取ったら検証する
+ここまででハンドシェイクが完了です。
+これ以降は安心してアプリケーションデータを暗号化して送信することができます。
 
-```
-struct {
-opaque verify_data[Hash.length];
-} Finished;
-```
+## Wiresharkを使ってトラフィックを見る
 
-```
-verify_data = HMAC(finished_key,
-Transcript-Hash(Handshake Context, Certificate*, CertificateVerify*))
-```
+<img src="./wireshark.png" width="500">
 
 ## まとめ
 
-TODO
+- セキュアな通信には機密性・安全性・真正性を考慮する必要があります。
+- TLSでは様々な暗号技術を組み合わせたハンドシェイクプロトコルとレコードプロトコルによって実現されました。
+- 具体的には(EC)DHEとHKDFによる鍵共有、証明書やトランスクリプトハッシュによる認証、AEADによる認証付き暗号などです。
 
-# RFC
-
-TLS1.2: https://datatracker.ietf.org/doc/html/rfc5246  
-TLS1.3: https://datatracker.ietf.org/doc/html/rfc8446  
-DHEパラメータ: https://datatracker.ietf.org/doc/html/rfc7919  
-暗号と認証の仕組みがわかる教科書   
-プロフェッショナルSSL/TLS   
-暗号技術入門  
-
-# 参考
-https://jovi0608.hatenablog.com/entry/2018/05/09/213703
-https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/
+## 参考
+- RFC
+  - https://datatracker.ietf.org/doc/html/rfc5246  
+  - https://datatracker.ietf.org/doc/html/rfc8446  
+  - https://datatracker.ietf.org/doc/html/rfc7919  
+  - https://datatracker.ietf.org/doc/html/rfc2104
+  - https://datatracker.ietf.org/doc/html/rfc5869
+  - https://datatracker.ietf.org/doc/html/rfc5116
+  - https://datatracker.ietf.org/doc/html/rfc5280
+- 書籍
+  - 図解即戦力 暗号と認証のしくみと理論がこれ1冊でしっかりわかる教科書 
+  - プロフェッショナルSSL/TLS
+    暗号技術入門 第３版 秘密の国のアリス
+- ブログ
+  - https://jovi0608.hatenablog.com/entry/2018/05/09/213703
+  - https://milestone-of-se.nesuke.com/nw-basic/tls/diffie-hellman-summary/
+  - https://unit42.paloaltonetworks.jp/unit42-customizing-wireshark-changing-column-display/
 
 
 
