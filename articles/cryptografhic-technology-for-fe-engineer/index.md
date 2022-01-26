@@ -1,5 +1,8 @@
 # TLSで学ぶ暗号技術
 
+https://qiita.com/shun_takagi/items/eb46e0c1f0bb512fa04d  
+の下書き
+
 # 概要
 
 HTTPS(`https://`)
