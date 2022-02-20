@@ -4,6 +4,11 @@
 
 今までのWCAGは柔軟なモデルになっており初期バージョンはから10年以上同じ構造を保ってきた。 しかし、技術の変化と障害者のニーズの変化により、より包括的かつ柔軟にコンテンツアクセシビリティに対応する新しいモデルが必要になってきた。
 
+## WCAG3.0の構造
+
+https://w3c.github.io/silver/explainer/#guidelines-structure  
+関連するOutcomesをグループ化したものがguidelines。
+
 ## 新しい採点方法
 
 > It has new scoring. Your site or product no longer has to pass 100% of the guidelines, as long as people with disabilities can use it.
@@ -11,9 +16,10 @@
 2系の達成基準は1つでも基準に満たなかったらガイドラインに準拠してないことになるが、3.0では障害者が利用できる程度なら必ずしも100%達成する必要がなくなった。
 目的が「準拠すること」ではなく、「アクセシブルにする」ことに意識を向けることができそうなので良い方向だと感じた。
 
-## function needs
+## functional needs と functional categories
 
-障害者のニーズをガイドラインの基盤となるもの
+function needsをグループ化したもの。
+https://www.w3.org/WAI/GL/WCAG3/2020/functional-needs/
 
 ## WCAGを読んで見ての感想、WCAG2.Xとの相違点
 
@@ -29,6 +35,11 @@
 
 WCAG2系でAAAに適合しても、実際に障害者にとって使いやすくなっているかを担保する仕組みはなかった。
 3.0ではテストの仕組みが変わり、実際障害者が使用するハードウェアや支援技術を使用したユーザビリティテストが加わることで、実際に障害者が使いやすいかを担保できるようになるっぽい。
+
+### サポート範囲が広い
+
+https://w3c.github.io/silver/explainer/#goals  
+よりも多くの障害者ニーズに対応できる。新しい技術にも対応できる。
 
 ## 新しいガイドラインへの移行
 
