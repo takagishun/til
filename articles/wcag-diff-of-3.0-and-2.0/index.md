@@ -1,5 +1,17 @@
 # お品書き
 
+## WCAG2.0について
+
+## WCAG2系の課題、WCAG3.0の新しい要件、背景
+
+https://w3c.github.io/silver/requirements/#problem_statements
+
+- 認知障害やロービジョンのニーズは合否よってのみ測定できるガイダンスでは満たされない。複数の測定手段が必要。
+- 静的webサイトだけではなく、複雑なwebアプリケーションでもアクセシビリティ向上できるようにする。画面ベースではなくタスクベースでの評価が必要。
+- Accessibility Supported?? https://w3c.github.io/silver/requirements/#oppotunities_conformance
+- 柔軟な手法の更新プロセス。ガイダンス全体が技術に追従が必要。
+- 平易な文章
+
 ## 技術の変化と障害者のニーズの変化
 
 今までのWCAGは柔軟なモデルになっており初期バージョンはから10年以上同じ構造を保ってきた。 しかし、技術の変化と障害者のニーズの変化により、より包括的かつ柔軟にコンテンツアクセシビリティに対応する新しいモデルが必要になってきた。
@@ -21,7 +33,7 @@ https://w3c.github.io/silver/explainer/#guidelines-structure
 function needsをグループ化したもの。
 https://www.w3.org/WAI/GL/WCAG3/2020/functional-needs/
 
-## WCAGを読んで見ての感想、WCAG2.Xとの相違点
+## WCAG3.0を読んで見ての感想
 
 ### 読みやすくなっている
 
