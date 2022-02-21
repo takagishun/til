@@ -21,6 +21,13 @@ https://w3c.github.io/silver/requirements/#problem_statements
 https://w3c.github.io/silver/explainer/#guidelines-structure  
 関連するOutcomesをグループ化したものがguidelines。
 
+### テスト手法
+
+- atomic test
+- holistic test
+
+## method
+
 ## 新しい採点方法
 
 > It has new scoring. Your site or product no longer has to pass 100% of the guidelines, as long as people with disabilities can use it.
