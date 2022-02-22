@@ -1,22 +1,36 @@
 # お品書き
 
-## WCAG2.0について
-
-## WCAG2系の課題、WCAG3.0の新しい要件、背景
-
-https://w3c.github.io/silver/requirements/#problem_statements
-
-- 認知障害やロービジョンのニーズは合否よってのみ測定できるガイダンスでは満たされない。複数の測定手段が必要。
-- 静的webサイトだけではなく、複雑なwebアプリケーションでもアクセシビリティ向上できるようにする。画面ベースではなくタスクベースでの評価が必要。
-- Accessibility Supported?? https://w3c.github.io/silver/requirements/#oppotunities_conformance
-- 柔軟な手法の更新プロセス。ガイダンス全体が技術に追従が必要。
-- 平易な文章
-
 ## 技術の変化と障害者のニーズの変化
 
 今までのWCAGは柔軟なモデルになっており初期バージョンはから10年以上同じ構造を保ってきた。 しかし、技術の変化と障害者のニーズの変化により、より包括的かつ柔軟にコンテンツアクセシビリティに対応する新しいモデルが必要になってきた。
 
-## WCAG3.0の構造
+## WCAGにおける問題点
+
+2017~2018で既存のガイドラインの問題点を調査された
+https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.g321b341b2a_0_159
+
+- 難しすぎて読めない
+- 始めるのが難しい
+- 成功基準の解釈の曖昧さ
+  - WCAG2.0の「技術にとらわれない」ものにするという目標が、ガイダンスにおいて曖昧さをもたらしてしまった。
+- アクセシビリティ対応実施を説得するのが困難
+  - 法律で要求されていても、必ずしも意思決定者にアクセシビリティへの投資を促す影響を与えるわけではない
+  - 日本では法律で規制されてないので尚更困難
+- 更新プロセス
+  - 10年前の障害者ニーズがいまだに取り込めてないものがある
+- ...
+
+https://w3c.github.io/silver/requirements/#problem_statements
+
+## WCAG3.0の要件
+
+WCAGにおける問題点を踏まえてWCAG3.0の要件が作成されている
+
+## WCAG3.0の設計指針
+
+WCAGにおける問題点を踏まえてWCAG3.0の設計指針が作成されている
+
+## WCAG3.0の構造の紹介一部
 
 https://w3c.github.io/silver/explainer/#guidelines-structure  
 関連するOutcomesをグループ化したものがguidelines。
@@ -26,16 +40,14 @@ https://w3c.github.io/silver/explainer/#guidelines-structure
 - atomic test
 - holistic test
 
-## method
-
-## 新しい採点方法
+### 新しい採点方法
 
 > It has new scoring. Your site or product no longer has to pass 100% of the guidelines, as long as people with disabilities can use it.
 
 2系の達成基準は1つでも基準に満たなかったらガイドラインに準拠してないことになるが、3.0では障害者が利用できる程度なら必ずしも100%達成する必要がなくなった。
 目的が「準拠すること」ではなく、「アクセシブルにする」ことに意識を向けることができそうなので良い方向だと感じた。
 
-## functional needs と functional categories
+### functional needs と functional categories
 
 function needsをグループ化したもの。
 https://www.w3.org/WAI/GL/WCAG3/2020/functional-needs/
@@ -55,12 +67,4 @@ https://www.w3.org/WAI/GL/WCAG3/2020/functional-needs/
 WCAG2系でAAAに適合しても、実際に障害者にとって使いやすくなっているかを担保する仕組みはなかった。
 3.0ではテストの仕組みが変わり、実際障害者が使用するハードウェアや支援技術を使用したユーザビリティテストが加わることで、実際に障害者が使いやすいかを担保できるようになるっぽい。
 
-### サポート範囲が広い
-
-https://w3c.github.io/silver/explainer/#goals  
-よりも多くの障害者ニーズに対応できる。新しい技術にも対応できる。
-
-## 新しいガイドラインへの移行
-
-マッピングなどの手法を用いた移行支援資料を提供する予定
 
