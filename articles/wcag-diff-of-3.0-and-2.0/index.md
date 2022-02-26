@@ -1,30 +1,49 @@
-# お品書き
+# Silver / WCAG 3.0
 
-## WCAGにおける問題点
+## Silverとは?
 
-2017~2018で既存のガイドラインの問題点を調査された
-- https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.g321b341b2a_0_159
-- https://www.w3.org/WAI/GL/task-forces/silver/wiki/Problem_Statements
-- https://www.w3.org/TR/accessibility-conformance-challenges/
+W3C WAI の Accessibility Guidelines Working Groupが、次世代のガイドラインを開発するために立ち上げたプロジェクト名
 
-TODO: ↑まとめる。一部紹介する。
+Accessibility Guidelines(Ag) を「銀」の化学記号を見立てて「Silver」と名付けられた
 
-## WCAG3.0の要件
+## WCAG 3.0とは?
 
-- https://w3c.github.io/silver/requirements/
+Silverで開発されているガイドライン名 W3C Accessibility Guidelines 3.0の略
 
-WCAGにおける問題点を踏まえてWCAG3.0の要件が作成されている
+ちなみにWCAG2系はWeb Contents Accessibility Guidelines
 
-TODO: ↑まとめる。一部紹介する。
+名前の変更からもWeb以外の幅広い範囲を対象としていることがわかる
 
-## WCAG3.0の設計指針
+## Silver Research Project
 
-WCAGにおける問題点を踏まえてWCAG3.0の設計指針が作成されている
+2017〜2018年にかけてこれまでのアクセシビリティガイドラインの構造に対する問題点が調査された
 
-## WCAG3.0の紹介
+調査結果の概要: [Research Summary](https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.gc6f73a04f_0_0)
+
+https://www.w3.org/TR/accessibility-conformance-challenges/
+
+## Silver Design Sprint
+
+2018年3月18~19日の2日間に専門家30名ほどで行われたミーティング
+
+- この1年間のリサーチを元に、現在のアクセシビリティガイドラインの問題点が整理された
+- その問題に対する対策方法としていくつかのプロトタイプが作成された
+
+[Report of Silver Design Sprint](https://www.w3.org/community/silver/draft-final-report-of-silver/)
+
+## Requirements for WCAG 3.0
+
+https://w3c.github.io/silver/requirements/
+
+## WCAG 3.0
 
 https://w3c.github.io/silver/guidelines/
-https://w3c.github.io/silver/explainer/#guidelines-structure
+
+## Explainer for WCAG 3.0
+
+https://w3c.github.io/silver/guidelines/
+
+## WCAG 3.0 中身を覗く
 
 - 構造
 - 適合
@@ -37,6 +56,10 @@ https://w3c.github.io/silver/explainer/#guidelines-structure
 
 2系の達成基準は1つでも基準に満たなかったらガイドラインに準拠してないことになるが、3.0では障害者が利用できる程度なら必ずしも100%達成する必要がなくなった。
 目的が「準拠すること」ではなく、「アクセシブルにする」ことに意識を向けることができそうなので良い方向だと感じた。
+
+## WCAG 3.0 Project Plan
+
+https://github.com/w3c/silver/wiki
 
 ## WCAG3.0に触れてみた感想
 
@@ -52,5 +75,7 @@ https://w3c.github.io/silver/explainer/#guidelines-structure
 
 WCAG2系でAAAに適合しても、実際に障害者にとって使いやすくなっているかを担保する仕組みはなかった。
 3.0ではテストの仕組みが変わり、実際障害者が使用するハードウェアや支援技術を使用したユーザビリティテストが加わることで、実際に障害者が使いやすいかを担保できるようになるっぽい。
+
+
 
 
