@@ -35,6 +35,11 @@ https://www.w3.org/TR/accessibility-conformance-challenges/
 
 https://w3c.github.io/silver/requirements/
 
+- ユーザビリティの向上
+- より多くの障害者のニーズのサポート
+- メンテナンス性の向上を目的としたアクセシビリティガイダンスの構造
+- プレゼンテーションの改善
+
 ## WCAG 3.0
 
 https://w3c.github.io/silver/guidelines/
