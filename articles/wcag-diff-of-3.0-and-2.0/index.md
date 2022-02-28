@@ -1,4 +1,4 @@
-# Silver / WCAG 3.0
+# What?
 
 ## Silverとは?
 
@@ -13,6 +13,25 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 ちなみにWCAG2系はWeb Contents Accessibility Guidelines
 
 名前の変更からもWeb以外の幅広い範囲を対象としていることがわかる
+
+# Background
+
+- 2008年12月
+  - WCAG 2.0 Recommendation
+- 2017~18年
+  - Silver Research Project
+- 2018年3月
+  - Silver Design Sprint
+- 2018年6月
+  - WCAG 2.1 Recommendation
+- 2020年2月
+  - WCAG 2.2 First Public Working Draft
+- 2021年1月
+  - WCAG 3.0 First Public Working Draft
+- 2021年6月
+  - WCAG 3.0 Working Draft 更新
+- 2021年12月
+  - WCAG 3.0 Working Draft 更新
 
 ## Silver Research Project
 
@@ -46,7 +65,7 @@ https://w3c.github.io/silver/guidelines/
 
 ## Explainer for WCAG 3.0
 
-https://w3c.github.io/silver/guidelines/
+https://w3c.github.io/silver/explainer/
 
 ## WCAG 3.0 中身を覗く
 
@@ -62,7 +81,7 @@ https://w3c.github.io/silver/guidelines/
 2系の達成基準は1つでも基準に満たなかったらガイドラインに準拠してないことになるが、3.0では障害者が利用できる程度なら必ずしも100%達成する必要がなくなった。
 目的が「準拠すること」ではなく、「アクセシブルにする」ことに意識を向けることができそうなので良い方向だと感じた。
 
-## WCAG 3.0 Project Plan
+## Project Plan
 
 https://github.com/w3c/silver/wiki
 
