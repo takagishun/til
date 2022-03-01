@@ -12,7 +12,9 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 
 ちなみにWCAG2系はWeb Contents Accessibility Guidelines
 
-名前の変更からもWeb以外の幅広い範囲を対象としていることがわかる
+名前の変更からもWeb以外の幅広い範囲を対象としていることがわかる  
+
+<b style="color: red">※まだまだ開発中のため業務でアクセシビリティ対応するときはWCAG 3.0は参考にしないこと</b>
 
 # Background
 
@@ -25,9 +27,9 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 - 2018年6月
   - WCAG 2.1 Recommendation
 - 2020年2月
-  - WCAG 2.2 First Public Working Draft
+  - WCAG 2.2 Working Draft 公開
 - 2021年1月
-  - WCAG 3.0 First Public Working Draft
+  - WCAG 3.0 Working Draft 公開
 - 2021年6月
   - WCAG 3.0 Working Draft 更新
 - 2021年12月
@@ -37,9 +39,12 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 
 2017〜2018年にかけてこれまでのアクセシビリティガイドラインの構造に対する問題点が調査された
 
-調査結果の概要: [Research Summary](https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.gc6f73a04f_0_0)
+調査結果の概要:
+[Research Summary](https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.gc6f73a04f_0_0)
+[Problem Statements](https://www.w3.org/WAI/GL/task-forces/silver/wiki/Problem_Statements#Too_Difficult_to_Read)
 
-https://www.w3.org/TR/accessibility-conformance-challenges/
+加えて、大規模かつ頻繁に更新される動的なWebアプリケーションにおいてアクセシビリティの評価や適合性をどのように適用するかという課題に対する調査・提案がドキュメント化されている
+[Challenges with Accessibility Guidelines Conformance and Testing, and Approaches for Mitigating Them](https://www.w3.org/TR/accessibility-conformance-challenges/)
 
 ## Silver Design Sprint
 
@@ -83,7 +88,14 @@ https://w3c.github.io/silver/explainer/
 
 ## Project Plan
 
+今はまだ新しい構造に対するフィードバック/ブラッシュアップ期間  
+
+要件や、新しいスコアリングや適合レベルに対して、フィードバックをもらいながら改善しているフェーズ。個別のガイドラインが決定されるのは2024年予定。  
+
+Recommendationになるのは2026 Q2予定。まだまだ先。。
+
 https://github.com/w3c/silver/wiki
+[WCAG 3.0 Schedule](https://docs.google.com/spreadsheets/d/1yzR1H0SnNFRELGchb_BJr4Necsrj6xVjDF1n7Tc0kTc/edit#gid=1414406908)
 
 ## WCAG3.0に触れてみた感想
 
