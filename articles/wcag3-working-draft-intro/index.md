@@ -49,42 +49,41 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 ## Silver Design Sprint
 
 2018年3月18~19日の2日間に専門家30名ほどで行われたミーティング
-
 - この1年間のリサーチを元に、現在のアクセシビリティガイドラインの問題点が整理された
-- その問題に対する対策方法としていくつかのプロトタイプが作成された
+- その問題に対する解決方法やプロトタイプが提案された
 
-[Report of Silver Design Sprint](https://www.w3.org/community/silver/draft-final-report-of-silver/)
+[Report of Silver Design Sprint](https://www.w3.org/community/silver/draft-final-report-of-silver/)  
+[参加者リスト](https://www.w3.org/WAI/GL/task-forces/silver/wiki/Design_Sprint_Participants)
+
+# Related documents
 
 ## Requirements for WCAG 3.0
 
-https://w3c.github.io/silver/requirements/
+WCAG 3.0 における要件  
+W3Cの勧告候補の段階で使用され、勧告候補移行の際に要件が満たされたことが報告される    
 
-- ユーザビリティの向上
-- より多くの障害者のニーズのサポート
-- メンテナンス性の向上を目的としたアクセシビリティガイダンスの構造
-- プレゼンテーションの改善
+[最新Editor’s Draft](https://w3c.github.io/silver/requirements/)  
+[最新Working Draft](https://www.w3.org/TR/wcag-3.0-requirements/)
+
+## Explainer for WCAG 3.0
+
+WCAG 3.0 の解説書
+- WCAG 3.0 開発の背景
+- WCAG 3.0の目標
+- 設計上の決定事項の説明
+- WCAG 2ガイドラインとの相違点
+
+[最新Editor’s Draft](https://w3c.github.io/silver/explainer/)  
+[最新Working Draft](https://www.w3.org/TR/wcag-3.0-explainer/)
+
 
 ## WCAG 3.0
 
 https://w3c.github.io/silver/guidelines/
 
-## Explainer for WCAG 3.0
+# Pick up from WCAG 3.0
 
-https://w3c.github.io/silver/explainer/
-
-## WCAG 3.0 中身を覗く
-
-- 構造
-- 適合
-- テスト
-  - atomic test
-  - holistic test
-- スコアリング
-
-> It has new scoring. Your site or product no longer has to pass 100% of the guidelines, as long as people with disabilities can use it.
-
-2系の達成基準は1つでも基準に満たなかったらガイドラインに準拠してないことになるが、3.0では障害者が利用できる程度なら必ずしも100%達成する必要がなくなった。
-目的が「準拠すること」ではなく、「アクセシブルにする」ことに意識を向けることができそうなので良い方向だと感じた。
+# 今後の動き
 
 ## Project Plan
 
@@ -97,7 +96,7 @@ Recommendationになるのは2026 Q2予定。まだまだ先。。
 https://github.com/w3c/silver/wiki
 [WCAG 3.0 Schedule](https://docs.google.com/spreadsheets/d/1yzR1H0SnNFRELGchb_BJr4Necsrj6xVjDF1n7Tc0kTc/edit#gid=1414406908)
 
-## WCAG3.0に触れてみた感想
+## 感想
 
 ### 読みやすくなっている
 
