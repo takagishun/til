@@ -93,6 +93,17 @@ WCAG2系と異なる部分について一部取り上げる。
 
 ## 適合レベル
 
+<img src="./structure-scoring.svg" width="300" alt="Figure 2 Documentation and Scoring Structure from First Public Working Draft">
+
+各ドキュメントのWCAG2系と3.0マッピング↓  
+※ 厳密には違う
+
+| WCAG 2系          |  WCAG 3.0   |
+|------------------|-----|
+| Success Criteria |  Outcomes   |
+| Techniques       |   Methods  |
+| Understanding    |   How-to  |
+
 ## テスト手法とスコアリング
 
 # WCAG 3.0 Schedule
