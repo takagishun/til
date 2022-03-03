@@ -1,22 +1,28 @@
-# What?
+WCAG 3.0 が2021年1月にWorking Draftとして公開されてました。
+Recommendationになるのはだいぶ先ですが、動向を定期的に追って行こうと思います。
 
-## Silverとは?
+# Silver / WCAG 3.0 とは?
 
-W3C WAI の Accessibility Guidelines Working Groupが、次世代のガイドラインを開発するために立ち上げたプロジェクト名
+## Silver
 
-Accessibility Guidelines(Ag) を「銀」の化学記号を見立てて「Silver」と名付けられた
+W3C WAI の Accessibility Guidelines Working Groupが、次世代のガイドラインを開発するために立ち上げたプロジェクト名。Accessibility Guidelines(Ag) を「銀」の化学記号を見立てて「Silver」と名付けられた
 
-## WCAG 3.0とは?
+## WCAG 3.0
 
-Silverで開発されているガイドライン名 W3C Accessibility Guidelines 3.0の略
+Silverで開発されているガイドライン名   
+W3C Accessibility Guidelines 3.0の略
+ちなみにWCAG2系はWeb Contents Accessibility Guidelinesの略
+Web以外の幅広い範囲も対象としていることが明示的に表現されている
 
-ちなみにWCAG2系はWeb Contents Accessibility Guidelines
+**※まだまだ開発中のため業務でアクセシビリティ対応するときはWCAG 3.0は参考にしないこと**
 
-名前の変更からもWeb以外の幅広い範囲を対象としていることがわかる  
+# WCAG 3.0 開発背景
 
-<b style="color: red">※まだまだ開発中のため業務でアクセシビリティ対応するときはWCAG 3.0は参考にしないこと</b>
+WCAG2系は10年以上の歴史があるが、これまでのモデルでは、最近の技術の変化や障害者のニーズの変化などに、対応しにくくなった。  
+そこでより包括的かつ柔軟な新しいモデルが必要となり今回3.0の開発がされた。
+開発するにあたり様々な調査が行われている。
 
-# Background
+## WCAG & Silver 簡易年表
 
 - 2008年12月
   - WCAG 2.0 Recommendation
@@ -37,13 +43,28 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 
 ## Silver Research Project
 
-2017〜2018年にかけてこれまでのアクセシビリティガイドラインの構造に対する問題点が調査された
+2017〜2018年にかけてこれまでのアクセシビリティガイドラインの構造に対する問題点が調査された。
+公開された資料の一部を転載する。内容が面白いのでぜひ資料を読んでみてほしいです。
+
+* ユーザビリティ
+  * 読むのも訳すのも難しすぎる。
+  * 初心者にとっつきにくい
+  * 成功基準の解釈が曖昧。アクセシビリティの専門家により、ガイドラインの解釈が異なる。
+
+* 適合性モデル
+  * 厳密なテスト可能性に対する制約がある
+  * 手動テストは、テスト担当者によって知識や優先順位が異なるため、異なる結果を得ることにも関連する。
+* メンテナンス
+  * 技術の進歩に合わせて更新でき、発見しやすく、より役立つ情報を提供するための柔軟性がない。
+  * 新しく変化する技術に対応した更新が難しい。時間がかかる
 
 調査結果の概要:
 [Research Summary](https://docs.google.com/presentation/d/1POs7orJ4ALB0bq5_vyo4v8RxDcr-5ctwD1noVgpXuJc/edit#slide=id.gc6f73a04f_0_0)
 [Problem Statements](https://www.w3.org/WAI/GL/task-forces/silver/wiki/Problem_Statements#Too_Difficult_to_Read)
 
-加えて、大規模かつ頻繁に更新される動的なWebアプリケーションにおいてアクセシビリティの評価や適合性をどのように適用するかという課題に対する調査・提案がドキュメント化されている
+## その他の調査
+
+大規模かつ頻繁に更新される動的なWebアプリケーションにおいてアクセシビリティの評価や適合性をどのように適用するかという課題に対する調査・提案
 [Challenges with Accessibility Guidelines Conformance and Testing, and Approaches for Mitigating Them](https://www.w3.org/TR/accessibility-conformance-challenges/)
 
 ## Silver Design Sprint
@@ -55,12 +76,14 @@ Silverで開発されているガイドライン名 W3C Accessibility Guidelines
 [Report of Silver Design Sprint](https://www.w3.org/community/silver/draft-final-report-of-silver/)  
 [参加者リスト](https://www.w3.org/WAI/GL/task-forces/silver/wiki/Design_Sprint_Participants)
 
-# Documents
+# 関連ドキュメント
+
+WCAG 3.0にはいくつか関連するドキュメントがあるので一部紹介する
 
 ## Requirements for WCAG 3.0
 
 WCAG 3.0 における要件  
-W3Cの勧告候補の段階で使用され、勧告候補移行の際に要件が満たされたことが報告される    
+W3Cの勧告候補の段階で使用され、勧告候補移行の際に要件が満たされたことが報告される
 
 [最新Editor’s Draft](https://w3c.github.io/silver/requirements/)  
 [最新Working Draft](https://www.w3.org/TR/wcag-3.0-requirements/)
@@ -76,61 +99,44 @@ WCAG 3.0 の解説書
 [最新Editor’s Draft](https://w3c.github.io/silver/explainer/)  
 [最新Working Draft](https://www.w3.org/TR/wcag-3.0-explainer/)
 
-## WCAG 3.0
+## WCAG 3.0 本体
 
 https://w3c.github.io/silver/guidelines/
 
-# Pick up from WCAG 3.0
+# WCAG 3.0 コンテンツ紹介
 
-WCAG2系と異なる部分について一部取り上げる。  
-※あくまでWCAG 3.0 Working Draft で提案されているものなので変更あることが前提
+Working Draftになってまもないので、コンテンツは変更される事が前提だが、一部紹介
 
-- 構造
-- 適合レベル
-- テスト手法とスコアリング
+## スコアリングの導入
 
-## ガイドライン構造
+今まで達成基準が達成しているかを評価するテストは合格・不合格の2択だったが、合格・不合格に加えて、スケール評価(1,2,3,4で評価)、パーセンテージ評価などが追加され、テストが柔軟になった。その評価を元にガイドライン全体のスコアを出せるようになった。
+合格・不合格の2択では評価できない、主に認知障害や知的障害のある人のニーズをサポートするためのガイドライン項目が取り込みやすくなっている。
 
-## 適合レベル
+## Holistic testsの導入
 
-<img src="./structure-scoring.svg" width="300" alt="Figure 2 Documentation and Scoring Structure from First Public Working Draft">
+Holistic testsとは、障害者が使用するハードウェアやソフトウェア（支援技術）を使ったユーザビリティテストやマニュアルテストのこと。
+WCAG 2系までの達成基準(WCAG 3.0では「Outcomes」と呼ばれる)を評価するテストは、Atomic testsを呼ぶようになる。
+Holistic testsを導入することで、アクセシビリティ対応が実際に障害者のユーザービリティ向上に繋がるようになることが期待される。
+Holistic testsの詳細はまだ決まってない。
 
-各ドキュメントのWCAG2系と3.0マッピング↓  
-※ 厳密には違う
+## 適合レベルの変更
 
-| WCAG 2系          |  WCAG 3.0   |
-|------------------|-----|
-| Success Criteria |  Outcomes   |
-| Techniques       |   Methods  |
-| Understanding    |   How-to  |
+WCAG2系までは、A,AA,AAAだったが、 Bronze, Silver, Goldに変更になった。
+AAがおおよそBronzeに対応する(厳密には違う)。BronzeはAtomic testsのスコアの結果で判定される。Silver, GoldはBronzeが達成されているのが前提で、さらにHolistic testsを突破する必要がある。
 
-## テスト手法とスコアリング
+## how to ドキュメントの導入
 
-# WCAG 3.0 Schedule
+各ガイドライン毎に紐づく説明資料が導入された。2系ではunderstandingというドキュメントが達成基準毎に用意されていたが、立ち位置はそれに似ている。 なぜそのガイドラインが存在しているのかだったり、そのガイドラインに対応すると誰が救われるのかなどのわかりやすい説明がある。個人的に良いと思ったのは、プロジェクトの各フェーズでそれぞれの担当者が考えるべきポイントについてこのように説明があるところ。
 
-## Project Plan
+https://www.w3.org/TR/wcag-3.0/#text-alternatives
+https://www.w3.org/WAI/GL/WCAG3/2021/how-tos/text-alternatives/
 
-今はまだ新しい構造に対するフィードバック/ブラッシュアップ期間
+# 今後の動き
 
-要件や、新しいスコアリングや適合レベルに対して、フィードバックをもらいながら改善しているフェーズ。個別のガイドラインが決定されるのは2024年予定。
-
+今はまだ新しい構造に対するフィードバック/ブラッシュアップ期間  
+要件や、新しいスコアリングや適合レベルに対して、フィードバックをもらいながら改善しているフェーズ。個別のガイドラインが決定されるのは2024年予定。  
 Recommendationになるのは2026 Q2予定。まだまだ先。。
 
 https://github.com/w3c/silver/wiki
 [WCAG 3.0 Schedule](https://docs.google.com/spreadsheets/d/1yzR1H0SnNFRELGchb_BJr4Necsrj6xVjDF1n7Tc0kTc/edit#gid=1414406908)
-
-# 感想
-
-- うまく構造化されて読みやすくなっている
-- 解決しようとしている問題や方向性はすごく可能性を秘めていると感じた
-
-- ガイドラインTOPページ自体がすっきりしている。アコーディオンなどをうまく活用し、みたい情報だけにアクセスできるようになっている。各周辺ドキュメントに情報をうまく移譲していてわかりやすい。
-- 各ガイドラインをどう利用するかがわかるhow toというものが新設された。今まではunderstanding(達成基準に対する説明ドキュメント)しかなかったので、各ガイドラインで何をどうしたいのかがわかりにくかった。
-  - 例えば: https://www.w3.org/WAI/GL/WCAG3/2021/how-tos/text-alternatives/
-  - それぞれが何をすれば良いか、なぜするべきか、誰にメリットがあるかなどが平易な文で書かれていて、プランナー、デザイナー、開発者、テスター別に、何をしたら良いかが丁寧に書かれている、感動!
-- WCAG2系でAAAに適合しても、実際に障害者にとって使いやすくなっているかを担保する仕組みはなかった。
-- 3.0ではテストの仕組みが変わり、実際障害者が使用するハードウェアや支援技術を使用したユーザビリティテストが加わることで、実際に障害者が使いやすいかを担保できるようになるっぽい。
-
-
-
 
